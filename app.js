@@ -5,6 +5,7 @@ import {
 } from "./js/icons.js";
 import {
     BADGE_COLOR_PRESETS,
+    DEFAULT_BADGE_COLOR,
     DEFAULT_STATE,
     canMergeSelection,
     canSplitSelection,
@@ -88,6 +89,7 @@ function bindEvents() {
     dom.slotCountInput.addEventListener("change", handleConfigChange);
     dom.cellWidthInput.addEventListener("change", handleConfigChange);
     dom.cellHeightInput.addEventListener("change", handleConfigChange);
+    document.addEventListener("keydown", handleDocumentKeydown);
 
     dom.selectedTextInput.addEventListener("input", (event) => {
         applyToSelected((label) => {
@@ -258,6 +260,30 @@ function handleMergeAction() {
     mergeSelection(state.labels, state.selectedIndices);
     state.selectedIndices = [firstIndex];
     selectionAnchorIndex = firstIndex;
+    render();
+    queueSave();
+}
+
+function handleDocumentKeydown(event) {
+    if (event.key !== "Delete" || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+    }
+
+    if (isEditableTarget(event.target)) {
+        return;
+    }
+
+    clearSelectedCells();
+    event.preventDefault();
+}
+
+function clearSelectedCells() {
+    applyToSelected((label) => {
+        label.text = "";
+        label.icon = DEFAULT_ICON_NAME;
+        label.badgeColor = DEFAULT_BADGE_COLOR;
+    });
+
     render();
     queueSave();
 }
@@ -487,6 +513,14 @@ function getVisibleRange(startIndex, endIndex) {
 
 function getSelectionAnchorIndex() {
     return state.selectedIndices[0] ?? 0;
+}
+
+function isEditableTarget(target) {
+    if (!(target instanceof Element)) {
+        return false;
+    }
+
+    return Boolean(target.closest("input, textarea, select, [contenteditable='true'], .ts-control, .ts-dropdown"));
 }
 
 function renderIconMarkup(className, context) {

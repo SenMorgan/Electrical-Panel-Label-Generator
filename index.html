@@ -69,12 +69,12 @@
                         <h2 class="h3 mb-1">Selected Label</h2>
                         <p id="selectedMeta" class="text-secondary small mb-3"></p>
                         <div class="mb-3">
-                            <label class="form-label" for="selectedIconInput">Icon</label>
-                            <select id="selectedIconInput" class="form-select" autocomplete="off"></select>
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label" for="selectedTextInput">Description</label>
                             <input id="selectedTextInput" class="form-control" type="text" maxlength="60" placeholder="Breaker description">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="selectedIconInput">Icon</label>
+                            <select id="selectedIconInput" class="form-select" autocomplete="off"></select>
                         </div>
                         <div class="row g-2 mb-3">
                             <div class="col-sm-7">
@@ -92,7 +92,7 @@
                         <div class="d-grid gap-2">
                             <button type="button" id="mergeToggleBtn" class="btn btn-primary" hidden>Merge Selected Cells</button>
                         </div>
-                        <p class="hint text-secondary small mt-3 mb-0">Click any preview cell text to edit directly. Shift+click selects a range, Ctrl/Cmd+click adds or removes cells, and merge appears when the selection is a contiguous unmerged run.</p>
+                        <p class="hint text-secondary small mt-3 mb-0">Click any preview cell text to edit directly. Shift+click selects a range, Ctrl/Cmd+click adds or removes cells, Delete clears the current selection when focus is outside an editor, and merge appears when the selection is a contiguous unmerged run.</p>
                     </div>
                 </div>
 

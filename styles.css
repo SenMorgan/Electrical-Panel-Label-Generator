@@ -289,6 +289,11 @@ body {
     color: var(--ink);
 }
 
+.ts-dropdown-content {
+    max-height: max(300px, 50vh);
+}
+
+
 .icon-select-option,
 .icon-select-item {
     display: flex;
