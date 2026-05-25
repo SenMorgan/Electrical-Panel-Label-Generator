@@ -34,6 +34,8 @@ const dom = {
     resetBtn: document.querySelector("#resetBtn"),
     previewBtn: document.querySelector("#previewBtn"),
     previewBar: document.querySelector("#previewBar"),
+    printWarningDialog: document.querySelector("#printWarningDialog"),
+    disablePrintWarningCheckbox: document.querySelector("#disablePrintWarningCheckbox"),
     previewPrintBtn: document.querySelector("#previewPrintBtn"),
     closePreviewBtn: document.querySelector("#closePreviewBtn"),
     printBtn: document.querySelector("#printBtn"),
@@ -138,12 +140,15 @@ function bindEvents() {
     dom.closePreviewBtn.addEventListener("click", () => {
         setPreviewMode(false);
     });
-    dom.previewPrintBtn.addEventListener("click", () => {
-        window.print();
-    });
-    dom.printBtn.addEventListener("click", () => {
-        window.print();
-    });
+    dom.previewPrintBtn.addEventListener("click", handlePrintRequest);
+    dom.printBtn.addEventListener("click", handlePrintRequest);
+
+    if (dom.printWarningDialog) {
+        dom.printWarningDialog.addEventListener("close", handlePrintWarningClose);
+        dom.printWarningDialog.addEventListener("cancel", () => {
+            dom.disablePrintWarningCheckbox.checked = false;
+        });
+    }
 
     dom.labelStrip.addEventListener("mousedown", (event) => {
         const cell = event.target.closest("[data-index]");
@@ -206,6 +211,45 @@ function render() {
 function setPreviewMode(isPreviewing) {
     document.body.classList.toggle("preview-print", isPreviewing);
     dom.previewBar.hidden = !isPreviewing;
+}
+
+function handlePrintRequest() {
+    if (!state.preferences.showPrintWarning) {
+        window.print();
+        return;
+    }
+
+    if (typeof dom.printWarningDialog?.showModal !== "function") {
+        const confirmed = window.confirm("Set printer scale to 100% in the printer settings so the label sizes stay accurate in millimeters.");
+
+        if (confirmed) {
+            window.print();
+        }
+
+        return;
+    }
+
+    dom.disablePrintWarningCheckbox.checked = false;
+    dom.printWarningDialog.showModal();
+}
+
+function handlePrintWarningClose() {
+    const shouldPrint = dom.printWarningDialog.returnValue === "confirm";
+
+    if (!shouldPrint) {
+        dom.disablePrintWarningCheckbox.checked = false;
+        return;
+    }
+
+    const nextShowPrintWarning = !dom.disablePrintWarningCheckbox.checked;
+
+    if (state.preferences.showPrintWarning !== nextShowPrintWarning) {
+        state.preferences.showPrintWarning = nextShowPrintWarning;
+        queueSave();
+    }
+
+    dom.disablePrintWarningCheckbox.checked = false;
+    window.print();
 }
 
 function initBadgeColorPresets() {

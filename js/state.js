@@ -23,6 +23,9 @@ export const DEFAULT_STATE = {
         cellWidth: 18,
         cellHeight: 30
     },
+    preferences: {
+        showPrintWarning: true
+    },
     selectedIndices: [0],
     labels: []
 };
@@ -55,6 +58,9 @@ export function normalizeState(inputState) {
             slotCount: clampInt(inputState?.config?.slotCount, 14, 1, 42),
             cellWidth: clampNumber(inputState?.config?.cellWidth, 18, 8, 50),
             cellHeight: clampNumber(inputState?.config?.cellHeight, 30, 10, 60)
+        },
+        preferences: {
+            showPrintWarning: inputState?.preferences?.showPrintWarning !== false
         },
         selectedIndices: Array.isArray(inputState?.selectedIndices)
             ? inputState.selectedIndices
