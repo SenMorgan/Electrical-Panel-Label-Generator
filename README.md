@@ -41,3 +41,9 @@ Static DIN rail breaker label generator built for GitHub Pages and local file ho
 - Legacy icon alias compatibility has been removed; stored icon names now use direct MDI identifiers.
 - Core behavior is still implemented in plain browser JavaScript with no build step.
 - Relative paths are GitHub Pages safe.
+-
+## Privacy
+
+- This app does not use cookies for tracking or advertising.
+- It stores layout data and UI preferences locally in the browser using `localStorage`.
+- The app loads third-party assets from jsDelivr, including Bootstrap, Material Design Icons, and Tom Select. Those requests may expose standard technical data such as the visitor IP address to that provider.
