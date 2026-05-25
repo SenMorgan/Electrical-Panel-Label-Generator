@@ -55,7 +55,7 @@ let saveTimerId = 0;
 let allIcons = [];
 let iconPicker = null;
 let syncingIconPicker = false;
-let selectionAnchorIndex = getLastSelectionIndex();
+let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
 
 void init();
@@ -232,7 +232,7 @@ function handleConfigChange() {
     };
 
     state = normalizeState(nextState);
-    selectionAnchorIndex = getLastSelectionIndex();
+    selectionAnchorIndex = getSelectionAnchorIndex();
     render();
     queueSave();
 }
@@ -265,6 +265,7 @@ function handleMergeAction() {
 function selectCell(index, options = {}) {
     const ownerIndex = state.labels[index]?.covered ? findOwnerIndex(state.labels, index) : index;
     let nextSelection;
+    let nextAnchorIndex = selectionAnchorIndex;
 
     if (options.extend) {
         nextSelection = getVisibleRange(selectionAnchorIndex, ownerIndex);
@@ -280,10 +281,16 @@ function selectCell(index, options = {}) {
         nextSelection = Array.from(selected);
     } else {
         nextSelection = [ownerIndex];
+        nextAnchorIndex = ownerIndex;
     }
 
     state.selectedIndices = normalizeSelection(state.labels, nextSelection);
-    selectionAnchorIndex = ownerIndex;
+
+    if (!state.selectedIndices.includes(nextAnchorIndex)) {
+        nextAnchorIndex = state.selectedIndices[0] ?? 0;
+    }
+
+    selectionAnchorIndex = nextAnchorIndex;
     render();
 
     if (options.focusText !== false && state.selectedIndices.length === 1) {
@@ -318,7 +325,7 @@ function importState(event) {
     reader.onload = () => {
         try {
             state = normalizeState(JSON.parse(String(reader.result)));
-            selectionAnchorIndex = getLastSelectionIndex();
+            selectionAnchorIndex = getSelectionAnchorIndex();
             render();
             queueSave();
         } catch {
@@ -331,7 +338,7 @@ function importState(event) {
 
 function resetState() {
     state = normalizeState(cloneState(DEFAULT_STATE));
-    selectionAnchorIndex = getLastSelectionIndex();
+    selectionAnchorIndex = getSelectionAnchorIndex();
     render();
     queueSave();
 }
@@ -478,8 +485,8 @@ function getVisibleRange(startIndex, endIndex) {
     }, []);
 }
 
-function getLastSelectionIndex() {
-    return state.selectedIndices[state.selectedIndices.length - 1] ?? 0;
+function getSelectionAnchorIndex() {
+    return state.selectedIndices[0] ?? 0;
 }
 
 function renderIconMarkup(className, context) {
