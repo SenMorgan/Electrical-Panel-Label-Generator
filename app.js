@@ -348,6 +348,14 @@ function handleDocumentKeydown(event) {
         return;
     }
 
+    if (!event.ctrlKey && !event.metaKey && !event.altKey && isNavigationKey(event.key)) {
+        if (shouldHandleArrowNavigation(event.target) && moveSelection(event.key)) {
+            event.preventDefault();
+        }
+
+        return;
+    }
+
     if (event.key === "Escape") {
         if (!state.selectedIndices.length) {
             return;
@@ -414,6 +422,43 @@ function selectAllCells() {
     }, []);
     selectionAnchorIndex = getSelectionAnchorIndex();
     render();
+}
+
+function moveSelection(key) {
+    const selectableIndices = getSelectableIndices();
+
+    if (!selectableIndices.length) {
+        return false;
+    }
+
+    if (!state.selectedIndices.length) {
+        const nextIndex = key === "ArrowLeft" || key === "ArrowUp"
+            ? selectableIndices[selectableIndices.length - 1]
+            : selectableIndices[0];
+
+        selectCell(nextIndex);
+        return true;
+    }
+
+    const currentIndex = state.selectedIndices.includes(selectionAnchorIndex)
+        ? selectionAnchorIndex
+        : state.selectedIndices[0];
+    const visibleIndex = selectableIndices.indexOf(currentIndex);
+
+    if (visibleIndex < 0) {
+        return false;
+    }
+
+    const step = key === "ArrowLeft" || key === "ArrowUp" ? -1 : 1;
+    const nextVisibleIndex = Math.min(selectableIndices.length - 1, Math.max(0, visibleIndex + step));
+
+    if (nextVisibleIndex === visibleIndex) {
+        selectCell(selectableIndices[visibleIndex]);
+        return true;
+    }
+
+    selectCell(selectableIndices[nextVisibleIndex]);
+    return true;
 }
 
 function selectCell(index, options = {}) {
@@ -731,4 +776,30 @@ function showToast(message) {
     if (toast) {
         toast.show();
     }
+}
+
+function getSelectableIndices() {
+    return state.labels.reduce((indices, label, index) => {
+        if (!label.covered) {
+            indices.push(index);
+        }
+
+        return indices;
+    }, []);
+}
+
+function isNavigationKey(key) {
+    return key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
+}
+
+function shouldHandleArrowNavigation(target) {
+    if (!(target instanceof Element)) {
+        return true;
+    }
+
+    if (target === dom.selectedTextInput) {
+        return true;
+    }
+
+    return !target.closest("input, textarea, select, .ts-control, .ts-dropdown");
 }
