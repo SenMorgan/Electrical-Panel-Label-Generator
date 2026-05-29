@@ -23,7 +23,6 @@ import {
     saveState
 } from "./js/state.js";
 import {
-    placeCaretAtEnd,
     renderApp,
     updateCellText
 } from "./js/ui.js";
@@ -172,6 +171,10 @@ function bindEvents() {
 
     dom.labelStrip.addEventListener("mousedown", (event) => {
         const cell = event.target.closest("[data-index]");
+
+        if (cell && event.button === 0 && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+            event.preventDefault();
+        }
 
         pendingSelectionGesture = cell
             ? {
@@ -445,10 +448,11 @@ function selectCell(index, options = {}) {
     render();
 
     if (options.focusText !== false && state.selectedIndices.length === 1) {
-        const selectedText = dom.labelStrip.querySelector(`[data-index="${state.selectedIndices[0]}"] .cell-text`);
+        dom.selectedTextInput.focus();
 
-        if (selectedText) {
-            placeCaretAtEnd(selectedText);
+        if (typeof dom.selectedTextInput.setSelectionRange === "function") {
+            const caretPosition = dom.selectedTextInput.value.length;
+            dom.selectedTextInput.setSelectionRange(caretPosition, caretPosition);
         }
     }
 }
