@@ -383,6 +383,10 @@ body {
         print-color-adjust: exact;
     }
 
+    .cell-text:empty::before {
+        content: none;
+    }
+
     .preview-frame {
         box-shadow: none !important;
         border-radius: 0;

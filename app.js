@@ -370,7 +370,7 @@ function handleDocumentKeydown(event) {
         return;
     }
 
-    if (isEditableTarget(event.target)) {
+    if (isEditableTarget(event.target) && event.target !== dom.selectedTextInput) {
         return;
     }
 
