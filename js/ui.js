@@ -81,13 +81,34 @@ function renderStrip(dom, state) {
 
 function renderSelectionPanel(dom, state) {
     const selectedLabels = state.selectedIndices.map((index) => state.labels[index]).filter(Boolean);
+    const hasSelection = selectedLabels.length > 0;
     const commonText = getCommonValue(selectedLabels, "text");
     const commonBadgeColor = getCommonValue(selectedLabels, "badgeColor");
     const canMerge = canMergeSelection(state.labels, state.selectedIndices);
     const canSplit = canSplitSelection(state.labels, state.selectedIndices);
     const presetMatch = BADGE_COLOR_PRESETS.find((preset) => preset.value === commonBadgeColor);
 
-    dom.selectedMeta.textContent = describeSelection(state);
+    dom.selectedMeta.textContent = hasSelection ? describeSelection(state) : "No label selected.";
+    dom.selectedTextInput.disabled = !hasSelection;
+    dom.selectedBadgeColorPreset.disabled = !hasSelection;
+    dom.selectedBadgeColorHex.disabled = !hasSelection;
+    dom.selectedIconInput.disabled = !hasSelection;
+
+    if (!hasSelection) {
+        dom.selectedTextInput.value = "";
+        dom.selectedTextInput.placeholder = "Select a label to edit";
+        dom.selectedBadgeColorPreset.value = "";
+        dom.selectedBadgeColorHex.value = "";
+        dom.selectedBadgeColorHex.placeholder = "#43A047";
+        dom.selectedBadgeColorChip.style.backgroundColor = "transparent";
+        dom.selectedBadgeColorChip.classList.remove("mixed");
+        dom.selectedBadgeColorChip.setAttribute("title", "No selection");
+        dom.mergeToggleBtn.hidden = true;
+        dom.mergeToggleBtn.disabled = true;
+        dom.mergeToggleBtn.textContent = "Merge Selected Cells";
+        return;
+    }
+
     dom.selectedTextInput.value = commonText ?? "";
     dom.selectedTextInput.placeholder = commonText === null
         ? `Type to update ${selectedLabels.length} labels at once`
@@ -127,6 +148,10 @@ function formatNumber(value) {
 
 function describeSelection(state) {
     const { labels, selectedIndices } = state;
+
+    if (!selectedIndices.length) {
+        return "No label selected.";
+    }
 
     if (selectedIndices.length === 1) {
         const [index] = selectedIndices;

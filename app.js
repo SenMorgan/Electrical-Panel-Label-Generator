@@ -5,6 +5,7 @@ import {
 } from "./js/icons.js";
 import {
     BADGE_COLOR_PRESETS,
+    createPersistedState,
     DEFAULT_BADGE_COLOR,
     DEFAULT_STATE,
     canMergeSelection,
@@ -105,7 +106,8 @@ function bindEvents() {
     dom.slotCountInput.addEventListener("change", handleConfigChange);
     dom.cellWidthInput.addEventListener("change", handleConfigChange);
     dom.cellHeightInput.addEventListener("change", handleConfigChange);
-    document.addEventListener("keydown", handleDocumentKeydown);
+    document.addEventListener("keydown", handleDocumentKeydown, true);
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
 
     dom.selectedTextInput.addEventListener("input", (event) => {
         applyToSelected((label) => {
@@ -336,6 +338,22 @@ function handleMergeAction() {
 }
 
 function handleDocumentKeydown(event) {
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "a") {
+        selectAllCells();
+        event.preventDefault();
+        return;
+    }
+
+    if (event.key === "Escape") {
+        if (!state.selectedIndices.length) {
+            return;
+        }
+
+        clearSelection();
+        event.preventDefault();
+        return;
+    }
+
     if (event.key !== "Delete" || event.ctrlKey || event.metaKey || event.altKey) {
         return;
     }
@@ -348,7 +366,23 @@ function handleDocumentKeydown(event) {
     event.preventDefault();
 }
 
+function handleDocumentPointerDown(event) {
+    if (!state.selectedIndices.length || !(event.target instanceof Element)) {
+        return;
+    }
+
+    if (event.target.closest("[data-index], .inspector, .ts-dropdown, .print-warning-dialog")) {
+        return;
+    }
+
+    clearSelection();
+}
+
 function clearSelectedCells() {
+    if (!state.selectedIndices.length) {
+        return;
+    }
+
     applyToSelected((label) => {
         label.text = "";
         label.icon = DEFAULT_ICON_NAME;
@@ -357,6 +391,25 @@ function clearSelectedCells() {
 
     render();
     queueSave();
+}
+
+function clearSelection() {
+    state.selectedIndices = [];
+    selectionAnchorIndex = 0;
+    pendingSelectionGesture = null;
+    render();
+}
+
+function selectAllCells() {
+    state.selectedIndices = state.labels.reduce((indices, label, index) => {
+        if (!label.covered) {
+            indices.push(index);
+        }
+
+        return indices;
+    }, []);
+    selectionAnchorIndex = getSelectionAnchorIndex();
+    render();
 }
 
 function selectCell(index, options = {}) {
@@ -400,7 +453,7 @@ function selectCell(index, options = {}) {
 }
 
 function exportState() {
-    const payload = JSON.stringify(state, null, 2);
+    const payload = JSON.stringify(createPersistedState(state), null, 2);
     const blob = new Blob([payload], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -423,6 +476,7 @@ function importState(event) {
     reader.onload = () => {
         try {
             state = normalizeState(JSON.parse(String(reader.result)));
+            state.selectedIndices = [];
             selectionAnchorIndex = getSelectionAnchorIndex();
             render();
             queueSave();
@@ -470,6 +524,7 @@ async function loadDemoLayout(options = {}) {
         }
 
         state = normalizeState(await response.json());
+        state.selectedIndices = [];
         selectionAnchorIndex = getSelectionAnchorIndex();
         render();
         queueSave();
@@ -541,20 +596,33 @@ function setIconOptions(icons) {
 }
 
 function syncIconPickerValue() {
-    const commonIcon = getCommonSelectedValue("icon");
-    const isMixed = commonIcon === null;
-    const nextValue = isMixed ? "" : commonIcon || DEFAULT_ICON_NAME;
+    const hasSelection = state.selectedIndices.length > 0;
+    const commonIcon = hasSelection ? getCommonSelectedValue("icon") : "";
+    const isMixed = hasSelection && commonIcon === null;
+    const nextValue = !hasSelection ? "" : isMixed ? "" : commonIcon || DEFAULT_ICON_NAME;
 
     if (!iconPicker) {
+        dom.selectedIconInput.disabled = !hasSelection;
+
         if (nextValue) {
             dom.selectedIconInput.value = nextValue;
+        } else {
+            dom.selectedIconInput.value = "";
         }
 
         return;
     }
 
     syncingIconPicker = true;
-    iconPicker.settings.placeholder = isMixed ? "Mixed icons" : "Choose an icon";
+    iconPicker.settings.placeholder = !hasSelection ? "Select a label to edit" : isMixed ? "Mixed icons" : "Choose an icon";
+
+    if (typeof iconPicker.enable === "function" && typeof iconPicker.disable === "function") {
+        if (hasSelection) {
+            iconPicker.enable();
+        } else {
+            iconPicker.disable();
+        }
+    }
 
     if (nextValue) {
         iconPicker.setValue(nextValue, true);
@@ -599,7 +667,7 @@ function getCommonSelectedValue(fieldName) {
     const labels = state.selectedIndices.map((index) => state.labels[index]).filter(Boolean);
 
     if (!labels.length) {
-        return DEFAULT_ICON_NAME;
+        return "";
     }
 
     const [firstLabel] = labels;

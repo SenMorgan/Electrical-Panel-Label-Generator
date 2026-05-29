@@ -26,7 +26,7 @@ export const DEFAULT_STATE = {
     preferences: {
         showPrintWarning: true
     },
-    selectedIndices: [0],
+    selectedIndices: [],
     labels: []
 };
 
@@ -42,14 +42,26 @@ export function loadState() {
     }
 
     try {
-        return normalizeState(JSON.parse(stored));
+        const normalized = normalizeState(JSON.parse(stored));
+        normalized.selectedIndices = [];
+        return normalized;
     } catch {
         return normalizeState(cloneState(DEFAULT_STATE));
     }
 }
 
 export function saveState(state) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(createPersistedState(state)));
+}
+
+export function createPersistedState(state) {
+    const normalized = normalizeState(state);
+
+    return {
+        config: normalized.config,
+        preferences: normalized.preferences,
+        labels: normalized.labels
+    };
 }
 
 export function normalizeState(inputState) {
@@ -132,7 +144,7 @@ export function normalizeSelection(labels, selection) {
         .filter((value) => labels[value] && !labels[value].covered)))
         .sort((left, right) => left - right);
 
-    return normalized.length ? normalized : [0];
+    return normalized;
 }
 
 export function canMergeSelection(labels, selection) {
