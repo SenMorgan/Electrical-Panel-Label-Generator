@@ -19,7 +19,7 @@ export const BADGE_COLOR_PRESETS = [
 
 export const DEFAULT_STATE = {
     config: {
-        slotCount: 14,
+        slotCount: 10,
         cellWidth: 18,
         cellHeight: 30
     },
@@ -211,4 +211,24 @@ function clampNumber(value, fallback, min, max) {
     }
 
     return Math.min(max, Math.max(min, parsed));
+}
+
+export function hasStoredState() {
+    return window.localStorage.getItem(STORAGE_KEY) !== null;
+}
+
+export function isLayoutEmpty(state) {
+    const normalized = normalizeState(state);
+
+    if (normalized.config.slotCount !== DEFAULT_STATE.config.slotCount
+        || normalized.config.cellWidth !== DEFAULT_STATE.config.cellWidth
+        || normalized.config.cellHeight !== DEFAULT_STATE.config.cellHeight) {
+        return false;
+    }
+
+    return normalized.labels.every((label) => label.text === ""
+        && label.icon === DEFAULT_ICON_NAME
+        && label.badgeColor === DEFAULT_BADGE_COLOR
+        && label.span === 1
+        && !label.covered);
 }

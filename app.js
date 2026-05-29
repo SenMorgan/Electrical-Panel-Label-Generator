@@ -11,6 +11,8 @@ import {
     canSplitSelection,
     cloneState,
     findOwnerIndex,
+    hasStoredState,
+    isLayoutEmpty,
     loadState,
     mergeSelection,
     normalizeHexColor,
@@ -31,6 +33,7 @@ const dom = {
     exportBtn: document.querySelector("#exportBtn"),
     importBtn: document.querySelector("#importBtn"),
     importFileInput: document.querySelector("#importFileInput"),
+    loadDemoBtn: document.querySelector("#loadDemoBtn"),
     resetBtn: document.querySelector("#resetBtn"),
     previewBtn: document.querySelector("#previewBtn"),
     previewBar: document.querySelector("#previewBar"),
@@ -50,6 +53,8 @@ const dom = {
     paperSheet: document.querySelector("#paperSheet"),
     labelStrip: document.querySelector("#labelStrip"),
     cellTemplate: document.querySelector("#cellTemplate"),
+    toastNotice: document.querySelector("#toastNotice"),
+    toastNoticeBody: document.querySelector("#toastNoticeBody"),
     footerYear: document.querySelector("#footerYear")
 };
 
@@ -60,15 +65,24 @@ let iconPicker = null;
 let syncingIconPicker = false;
 let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
+let toast = null;
 
 void init();
 
 async function init() {
     initBadgeColorPresets();
+    initToast();
     dom.footerYear.textContent = String(new Date().getFullYear());
     bindEvents();
     initIconPicker();
     render();
+
+    if (!hasStoredState()) {
+        await loadDemoLayout({
+            skipConfirm: true,
+            notice: "Demo layout loaded. Start editing or reset to begin with a blank strip."
+        });
+    }
 
     try {
         allIcons = await loadIconCatalog();
@@ -133,6 +147,9 @@ function bindEvents() {
     dom.exportBtn.addEventListener("click", exportState);
     dom.importBtn.addEventListener("click", () => dom.importFileInput.click());
     dom.importFileInput.addEventListener("change", importState);
+    dom.loadDemoBtn.addEventListener("click", () => {
+        void loadDemoLayout();
+    });
     dom.resetBtn.addEventListener("click", resetState);
     dom.previewBtn.addEventListener("click", () => {
         setPreviewMode(true);
@@ -266,6 +283,16 @@ function initBadgeColorPresets() {
     dom.selectedBadgeColorPreset.replaceChildren(...options);
 }
 
+function initToast() {
+    if (!dom.toastNotice || typeof window.bootstrap?.Toast !== "function") {
+        return;
+    }
+
+    toast = window.bootstrap.Toast.getOrCreateInstance(dom.toastNotice, {
+        delay: 5000
+    });
+}
+
 function handleConfigChange() {
     const nextState = {
         ...state,
@@ -382,6 +409,7 @@ function exportState() {
     link.download = "panel-label-layout.json";
     link.click();
     URL.revokeObjectURL(url);
+    showToast("Layout exported as JSON.");
 }
 
 function importState(event) {
@@ -398,6 +426,7 @@ function importState(event) {
             selectionAnchorIndex = getSelectionAnchorIndex();
             render();
             queueSave();
+            showToast(`Imported layout from ${file.name}.`);
         } catch {
             dom.layoutStatus.textContent = "Import failed. Select a valid JSON layout export.";
         }
@@ -407,10 +436,49 @@ function importState(event) {
 }
 
 function resetState() {
+    if (!isLayoutEmpty(state)) {
+        const confirmed = window.confirm("Are you sure you want to reset the layout? This cannot be undone.");
+
+        if (!confirmed) {
+            return;
+        }
+    }
+
     state = normalizeState(cloneState(DEFAULT_STATE));
     selectionAnchorIndex = getSelectionAnchorIndex();
     render();
     queueSave();
+    showToast("Layout reset to default.");
+}
+
+async function loadDemoLayout(options = {}) {
+    const { skipConfirm = false, notice = "Demo layout loaded." } = options;
+
+    if (!skipConfirm && !isLayoutEmpty(state)) {
+        const confirmed = window.confirm("Load the demo layout? This will overwrite your current layout.");
+
+        if (!confirmed) {
+            return false;
+        }
+    }
+
+    try {
+        const response = await fetch("./demo-layout.json", { cache: "no-store" });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load demo layout: ${response.status}`);
+        }
+
+        state = normalizeState(await response.json());
+        selectionAnchorIndex = getSelectionAnchorIndex();
+        render();
+        queueSave();
+        showToast(notice);
+        return true;
+    } catch {
+        dom.layoutStatus.textContent = "Demo layout could not be loaded.";
+        return false;
+    }
 }
 
 function initIconPicker() {
@@ -578,4 +646,16 @@ function queueSave() {
     saveTimerId = window.setTimeout(() => {
         saveState(state);
     }, 300);
+}
+
+function showToast(message) {
+    if (!dom.toastNotice || !dom.toastNoticeBody) {
+        return;
+    }
+
+    dom.toastNoticeBody.textContent = message;
+
+    if (toast) {
+        toast.show();
+    }
 }

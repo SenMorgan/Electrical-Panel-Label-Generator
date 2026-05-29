@@ -1,0 +1,110 @@
+{
+  "config": {
+    "slotCount": 14,
+    "cellWidth": 18,
+    "cellHeight": 30
+  },
+  "selectedIndices": [
+    7
+  ],
+  "labels": [
+    {
+      "text": "Proudový chránič",
+      "icon": "electric-switch",
+      "badgeColor": "#8e24aa",
+      "span": 2,
+      "covered": false
+    },
+    {
+      "text": "",
+      "icon": "none",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": true
+    },
+    {
+      "text": "Zásuvky kuchyň",
+      "icon": "fridge-outline",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Kuchyňská linka",
+      "icon": "microwave",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Zásuvky ložnice",
+      "icon": "bed-king-outline",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Zásuvky obývací pokoj",
+      "icon": "television-classic",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Zásuvka trouba",
+      "icon": "stove",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Zásuvka pračka",
+      "icon": "washing-machine",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Zásuvka kotel",
+      "icon": "water-boiler",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Zásuvka myčka",
+      "icon": "dishwasher",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Venkovní zásuvka ",
+      "icon": "power-socket-fr",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Světla",
+      "icon": "lightbulb-multiple-outline",
+      "badgeColor": "#fdd835",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Digistor",
+      "icon": "ceiling-fan",
+      "badgeColor": "#fdd835",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "Ventilace",
+      "icon": "hvac",
+      "badgeColor": "#fdd835",
+      "span": 1,
+      "covered": false
+    }
+  ]
+}

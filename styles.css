@@ -367,6 +367,7 @@ body {
         flex-direction: column;
         align-items: stretch;
     }
+
 }
 
 @page {
@@ -480,4 +481,8 @@ body.preview-print .label-cell.selected {
     box-shadow: none;
     background: #fff;
     outline: none;
+}
+
+body.preview-print .toast-container {
+    display: none !important;
 }
