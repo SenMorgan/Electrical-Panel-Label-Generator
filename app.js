@@ -5,6 +5,7 @@ import {
 } from "./js/icons.js";
 import {
     BADGE_COLOR_PRESETS,
+    createExportState,
     createPersistedState,
     DEFAULT_BADGE_COLOR,
     DEFAULT_STATE,
@@ -453,7 +454,7 @@ function selectCell(index, options = {}) {
 }
 
 function exportState() {
-    const payload = JSON.stringify(createPersistedState(state), null, 2);
+    const payload = JSON.stringify(createExportState(state), null, 2);
     const blob = new Blob([payload], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

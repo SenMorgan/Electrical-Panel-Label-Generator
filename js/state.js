@@ -64,6 +64,15 @@ export function createPersistedState(state) {
     };
 }
 
+export function createExportState(state) {
+    const normalized = normalizeState(state);
+
+    return {
+        config: normalized.config,
+        labels: normalized.labels
+    };
+}
+
 export function normalizeState(inputState) {
     const normalized = {
         config: {
