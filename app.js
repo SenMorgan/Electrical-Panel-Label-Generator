@@ -25,6 +25,7 @@ import {
     renderApp,
     updateCellText
 } from "./js/ui.js";
+import { initLogger, showToast, showError, showWarning } from "./js/logger.js";
 
 const dom = {
     slotCountInput: document.querySelector("#slotCountInput"),
@@ -49,10 +50,11 @@ const dom = {
     paperSheet: document.querySelector("#paperSheet"),
     labelStrip: document.querySelector("#labelStrip"),
     cellTemplate: document.querySelector("#cellTemplate"),
-    toastNotice: document.querySelector("#toastNotice"),
-    toastNoticeBody: document.querySelector("#toastNoticeBody"),
+    toastContainer: document.querySelector("#toastContainer"),
     footerYear: document.querySelector("#footerYear")
 };
+
+initLogger(dom.toastContainer);
 
 let state = loadState();
 let saveTimerId = 0;
@@ -61,13 +63,22 @@ let iconPicker = null;
 let syncingIconPicker = false;
 let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
-let toast = null;
 
 void init();
 
 async function init() {
     initBadgeColorPresets();
-    initToast();
+
+    window.addEventListener("error", (event) => {
+        console.error("Uncaught error:", event.error ?? event.message);
+        showToast("An unexpected error occurred.", "error");
+    });
+
+    window.addEventListener("unhandledrejection", (event) => {
+        console.error("Unhandled promise rejection:", event.reason);
+        showToast("An unexpected error occurred.", "error");
+    });
+
     dom.footerYear.textContent = String(new Date().getFullYear());
     bindEvents();
     initIconPicker();
@@ -84,8 +95,8 @@ async function init() {
         allIcons = await loadIconCatalog();
         setIconOptions(allIcons);
         render();
-    } catch {
-        dom.layoutStatus.textContent = "Unable to load the full MDI icon catalog. Label editing and printing still work.";
+    } catch (error) {
+        showError("Unable to load the MDI icon catalog. Label editing and printing still work.", error);
     }
 }
 
@@ -264,16 +275,6 @@ function initBadgeColorPresets() {
     dom.selectedBadgeColorPreset.replaceChildren(...options);
 }
 
-function initToast() {
-    if (!dom.toastNotice || typeof window.bootstrap?.Toast !== "function") {
-        return;
-    }
-
-    toast = window.bootstrap.Toast.getOrCreateInstance(dom.toastNotice, {
-        delay: 5000
-    });
-}
-
 function handleConfigChange() {
     const nextState = {
         ...state,
@@ -304,7 +305,7 @@ function handleMergeAction() {
     }
 
     if (!canMergeSelection(state.labels, state.selectedIndices)) {
-        dom.layoutStatus.textContent = "Select two or more adjacent unmerged labels to merge them.";
+        showWarning("Select two or more adjacent unmerged labels to merge them.");
         return;
     }
 
@@ -506,8 +507,8 @@ function importState(event) {
             render();
             queueSave();
             showToast(`Imported layout from ${file.name}.`);
-        } catch {
-            dom.layoutStatus.textContent = "Import failed. Select a valid JSON layout export.";
+        } catch (error) {
+            showError("Import failed. Select a valid JSON layout export.", error);
         }
     };
     reader.readAsText(file);
@@ -555,8 +556,8 @@ async function loadDemoLayout(options = {}) {
         queueSave();
         showToast(notice);
         return true;
-    } catch {
-        dom.layoutStatus.textContent = "Demo layout could not be loaded.";
+    } catch (error) {
+        showError("Demo layout could not be loaded.", error);
         return false;
     }
 }
@@ -568,7 +569,7 @@ function initIconPicker() {
 
     iconPicker = new window.TomSelect(dom.selectedIconInput, {
         allowEmptyOption: true,
-        maxItems:1,
+        maxItems: 1,
         plugins: ['clear_button'],
         valueField: "value",
         labelField: "label",
@@ -743,18 +744,6 @@ function queueSave() {
     saveTimerId = window.setTimeout(() => {
         saveState(state);
     }, 300);
-}
-
-function showToast(message) {
-    if (!dom.toastNotice || !dom.toastNoticeBody) {
-        return;
-    }
-
-    dom.toastNoticeBody.textContent = message;
-
-    if (toast) {
-        toast.show();
-    }
 }
 
 function getSelectableIndices() {

@@ -1,6 +1,7 @@
 const STORAGE_KEY = "din-rail-label-generator-state";
 
 import { normalizeIconName } from "./icons.js";
+import { showError } from "./logger.js";
 
 export const DEFAULT_BADGE_COLOR = "#43a047";
 export const BADGE_COLOR_PRESETS = [
@@ -45,7 +46,8 @@ export function loadState() {
         const normalized = normalizeState(JSON.parse(stored));
         normalized.selectedIndices = [];
         return normalized;
-    } catch {
+    } catch (error) {
+        showError("Failed to restore saved layout, reverting to default.", error);
         return normalizeState(cloneState(DEFAULT_STATE));
     }
 }
