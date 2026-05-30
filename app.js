@@ -1,5 +1,4 @@
 import {
-    DEFAULT_ICON_NAME,
     loadIconCatalog,
     normalizeIconName
 } from "./js/icons.js";
@@ -86,14 +85,6 @@ async function init() {
         setIconOptions(allIcons);
         render();
     } catch {
-        setIconOptions([
-            {
-                value: DEFAULT_ICON_NAME,
-                label: "No icon",
-                className: "",
-                searchText: "none no icon empty clear"
-            }
-        ]);
         dom.layoutStatus.textContent = "Unable to load the full MDI icon catalog. Label editing and printing still work.";
     }
 }
@@ -135,7 +126,7 @@ function bindEvents() {
     });
 
     dom.selectedIconInput.addEventListener("change", () => {
-        handleIconChange(dom.selectedIconInput.value || DEFAULT_ICON_NAME);
+        handleIconChange(dom.selectedIconInput.value || "");
     });
 
     dom.mergeToggleBtn.addEventListener("click", () => {
@@ -381,7 +372,7 @@ function clearSelectedCells() {
 
     applyToSelected((label) => {
         label.text = "";
-        label.icon = DEFAULT_ICON_NAME;
+        label.icon = "";
         label.badgeColor = DEFAULT_BADGE_COLOR;
     });
 
@@ -576,12 +567,16 @@ function initIconPicker() {
     }
 
     iconPicker = new window.TomSelect(dom.selectedIconInput, {
+        allowEmptyOption: true,
+        maxItems:1,
+        plugins: ['clear_button'],
         valueField: "value",
         labelField: "label",
         searchField: ["searchText", "label", "value"],
-        maxOptions: 250,
+        maxOptions: 150,
         create: false,
         preload: false,
+        placeholder: "Select an icon",
         sortField: [
             { field: "$score" },
             { field: "label" }
@@ -599,7 +594,7 @@ function initIconPicker() {
         },
         onChange(value) {
             if (!syncingIconPicker) {
-                handleIconChange(value || DEFAULT_ICON_NAME);
+                handleIconChange(value);
             }
         }
     });
@@ -633,7 +628,7 @@ function syncIconPickerValue() {
     const hasSelection = state.selectedIndices.length > 0;
     const commonIcon = hasSelection ? getCommonSelectedValue("icon") : "";
     const isMixed = hasSelection && commonIcon === null;
-    const nextValue = !hasSelection ? "" : isMixed ? "" : commonIcon || DEFAULT_ICON_NAME;
+    const nextValue = !hasSelection ? "" : isMixed ? "" : commonIcon || "";
 
     if (!iconPicker) {
         dom.selectedIconInput.disabled = !hasSelection;
@@ -648,7 +643,7 @@ function syncIconPickerValue() {
     }
 
     syncingIconPicker = true;
-    iconPicker.settings.placeholder = !hasSelection ? "Select a label to edit" : isMixed ? "Mixed icons" : "Choose an icon";
+    iconPicker.settings.placeholder = !hasSelection ? "Select a label to edit" : isMixed ? "Mixed icons" : "Select an icon";
 
     if (typeof iconPicker.enable === "function" && typeof iconPicker.disable === "function") {
         if (hasSelection) {

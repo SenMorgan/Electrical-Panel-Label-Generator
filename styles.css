@@ -292,7 +292,7 @@ body {
 }
 
 .ts-dropdown-content {
-    max-height: max(300px, 50vh);
+    max-height: min(300px, 50vh);
 }
 
 

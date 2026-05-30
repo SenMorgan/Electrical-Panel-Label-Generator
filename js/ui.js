@@ -1,4 +1,4 @@
-import { buildIconClassName, DEFAULT_ICON_NAME, normalizeIconName } from "./icons.js";
+import { buildIconClassName, normalizeIconName } from "./icons.js";
 import { BADGE_COLOR_PRESETS, canMergeSelection, canSplitSelection } from "./state.js";
 
 export function renderApp(dom, state) {
@@ -185,7 +185,7 @@ function getCommonValue(labels, fieldName) {
 function renderIconPreview(iconName, context) {
     const normalizedName = normalizeIconName(iconName);
 
-    if (normalizedName === DEFAULT_ICON_NAME) {
+    if (!normalizedName) {
         return "";
     }
 
