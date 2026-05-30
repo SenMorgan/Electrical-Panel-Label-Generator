@@ -36,12 +36,8 @@ const dom = {
     importFileInput: document.querySelector("#importFileInput"),
     loadDemoBtn: document.querySelector("#loadDemoBtn"),
     resetBtn: document.querySelector("#resetBtn"),
-    previewBtn: document.querySelector("#previewBtn"),
-    previewBar: document.querySelector("#previewBar"),
     printWarningDialog: document.querySelector("#printWarningDialog"),
     disablePrintWarningCheckbox: document.querySelector("#disablePrintWarningCheckbox"),
-    previewPrintBtn: document.querySelector("#previewPrintBtn"),
-    closePreviewBtn: document.querySelector("#closePreviewBtn"),
     printBtn: document.querySelector("#printBtn"),
     selectedMeta: document.querySelector("#selectedMeta"),
     selectedIconInput: document.querySelector("#selectedIconInput"),
@@ -153,13 +149,6 @@ function bindEvents() {
         void loadDemoLayout();
     });
     dom.resetBtn.addEventListener("click", resetState);
-    dom.previewBtn.addEventListener("click", () => {
-        setPreviewMode(true);
-    });
-    dom.closePreviewBtn.addEventListener("click", () => {
-        setPreviewMode(false);
-    });
-    dom.previewPrintBtn.addEventListener("click", handlePrintRequest);
     dom.printBtn.addEventListener("click", handlePrintRequest);
 
     if (dom.printWarningDialog) {
@@ -229,11 +218,6 @@ function bindEvents() {
 function render() {
     renderApp(dom, state);
     syncIconPickerValue();
-}
-
-function setPreviewMode(isPreviewing) {
-    document.body.classList.toggle("preview-print", isPreviewing);
-    dom.previewBar.hidden = !isPreviewing;
 }
 
 function handlePrintRequest() {
