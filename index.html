@@ -17,7 +17,7 @@
             <div class="card-body d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
                     <h1 class="display-6 fw-semibold mb-2">Electrical Panel Label Generator</h1>
-                    <p class="text-secondary mb-0">Printable breaker strip editor with exact millimeter sizing, inline label editing, double-width cells, and JSON persistence.</p>
+                    <p class="text-secondary mb-0">Printable breaker label layout creator with live preview and JSON import/export. Set custom label text, icons, and colors for each breaker slot.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
                     <button type="button" id="previewBtn" class="btn btn-outline-secondary">Preview</button>
@@ -109,7 +109,7 @@
                         <div class="d-grid gap-2">
                             <button type="button" id="mergeToggleBtn" class="btn btn-primary" hidden>Merge Selected Cells</button>
                         </div>
-                        <p class="hint text-secondary small mt-3 mb-0">Click any preview cell text to edit directly. Shift+click selects a range, Ctrl/Cmd+click adds or removes cells, Delete clears the current selection when focus is outside an editor, and merge appears when the selection is a contiguous unmerged run.</p>
+                        <p class="hint text-secondary small mt-3 mb-0">Click any preview cell text to edit directly. Shift+click selects a range, Ctrl/Cmd+click adds or removes cells, Delete clears the current cell or selected range.</p>
                     </div>
                 </div>
 
@@ -152,7 +152,7 @@
                 <span class="cell-index"></span>
                 <span class="cell-icon" aria-hidden="true"></span>
             </div>
-            <div class="cell-text" contenteditable="true" spellcheck="false" data-placeholder="Click to label"></div>
+            <div class="cell-text" contenteditable="true" spellcheck="false" data-placeholder="Label text"></div>
         </article>
     </template>
 
