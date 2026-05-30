@@ -132,10 +132,7 @@ body {
 .preview-frame {
     overflow: auto;
     border-radius: 1.25rem;
-    background:
-        linear-gradient(90deg, rgba(13, 110, 253, 0.05) 1px, transparent 1px),
-        linear-gradient(rgba(13, 110, 253, 0.05) 1px, transparent 1px),
-        linear-gradient(180deg, #eaf0f7 0%, #dde5ee 100%);
+    background: radial-gradient(circle at 12mm 12mm, rgba(215, 221, 229, 0.95) 1px, transparent 1px);
     background-size: 24px 24px;
 }
 
@@ -156,6 +153,13 @@ body {
     color: var(--muted);
     letter-spacing: 0.12em;
     text-transform: uppercase;
+}
+
+.preview-frame__status {
+    border-color: rgba(215, 221, 229, 0.8) !important;
+    border-bottom-left-radius: 1.25rem;
+    border-bottom-right-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.6);
 }
 
 .label-strip {

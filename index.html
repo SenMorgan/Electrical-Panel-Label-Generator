@@ -113,13 +113,6 @@
                     </div>
                 </div>
 
-                <div class="panel card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h2 class="h3 mb-2">Output Status</h2>
-                        <p id="layoutStatus" class="text-secondary mb-2"></p>
-                        <p class="hint text-secondary small mb-0">Print uses A4 landscape sizing, preserves millimeter dimensions, and hides controls automatically.</p>
-                    </div>
-                </div>
             </aside>
 
             <section class="preview-column col-12 col-xxl-9" aria-label="Label preview">
@@ -129,6 +122,9 @@
                         <div class="sheet-title d-print-none">Live Strip Preview</div>
                         <div id="labelStrip" class="label-strip" role="grid" aria-label="Electrical panel label strip"></div>
                     </div>
+                    </div>
+                    <div class="preview-frame__status d-print-none px-3 px-xl-4 py-2 border-top">
+                        <p id="layoutStatus" class="text-secondary small mb-0"></p>
                     </div>
                 </div>
             </section>
