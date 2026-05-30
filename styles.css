@@ -44,31 +44,6 @@ body {
     text-decoration: underline;
 }
 
-.preview-bar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    margin-bottom: 1rem;
-}
-
-.preview-bar__content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.85rem 1rem;
-    border: 1px solid rgba(215, 221, 229, 0.95);
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(12px);
-}
-
-.preview-bar__label {
-    color: var(--muted);
-    font-size: 0.95rem;
-}
-
 .print-warning-dialog {
     width: min(100% - 2rem, 29rem);
     padding: 0;
@@ -132,10 +107,7 @@ body {
 .preview-frame {
     overflow: auto;
     border-radius: 1.25rem;
-    background:
-        linear-gradient(90deg, rgba(13, 110, 253, 0.05) 1px, transparent 1px),
-        linear-gradient(rgba(13, 110, 253, 0.05) 1px, transparent 1px),
-        linear-gradient(180deg, #eaf0f7 0%, #dde5ee 100%);
+    background: radial-gradient(circle at 12mm 12mm, rgba(215, 221, 229, 0.95) 1px, transparent 1px);
     background-size: 24px 24px;
 }
 
@@ -313,7 +285,7 @@ body {
 }
 
 .ts-dropdown-content {
-    max-height: max(300px, 50vh);
+    max-height: min(350px, 50vh);
 }
 
 
@@ -362,12 +334,6 @@ body {
     .paper-sheet {
         margin-left: 0;
     }
-
-    .preview-bar__content {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
 }
 
 @page {
@@ -397,7 +363,6 @@ body {
     .toolbar,
     .inspector,
     .sheet-title,
-    .preview-bar,
     .app-footer {
         display: none !important;
     }
@@ -434,59 +399,4 @@ body {
         background: #fff;
         outline: none;
     }
-}
-
-body.preview-print {
-    background: #fff;
-}
-
-body.preview-print .app-header,
-body.preview-print .toolbar,
-body.preview-print .inspector,
-body.preview-print .sheet-title,
-body.preview-print .app-footer {
-    display: none !important;
-}
-
-body.preview-print .app-shell,
-body.preview-print .workspace,
-body.preview-print .preview-column,
-body.preview-print .preview-frame {
-    padding: 0;
-    margin: 0;
-    display: block;
-    border: 0;
-    background: transparent;
-}
-
-body.preview-print .preview-frame {
-    box-shadow: none !important;
-    border-radius: 0;
-    overflow: visible;
-}
-
-body.preview-print .preview-frame .card-body {
-    padding: 0 !important;
-    background: transparent !important;
-}
-
-body.preview-print .paper-sheet {
-    width: auto;
-    min-height: auto;
-    padding: 8mm 10mm;
-    margin: 0;
-    box-shadow: none;
-    border-radius: 0;
-    overflow: visible;
-}
-
-body.preview-print .label-cell.selected {
-    z-index: auto;
-    box-shadow: none;
-    background: #fff;
-    outline: none;
-}
-
-body.preview-print .toast-container {
-    display: none !important;
 }

@@ -1,5 +1,4 @@
 import {
-    DEFAULT_ICON_NAME,
     loadIconCatalog,
     normalizeIconName
 } from "./js/icons.js";
@@ -26,6 +25,7 @@ import {
     renderApp,
     updateCellText
 } from "./js/ui.js";
+import { initLogger, showToast, showError, showWarning } from "./js/logger.js";
 
 const dom = {
     slotCountInput: document.querySelector("#slotCountInput"),
@@ -36,12 +36,8 @@ const dom = {
     importFileInput: document.querySelector("#importFileInput"),
     loadDemoBtn: document.querySelector("#loadDemoBtn"),
     resetBtn: document.querySelector("#resetBtn"),
-    previewBtn: document.querySelector("#previewBtn"),
-    previewBar: document.querySelector("#previewBar"),
     printWarningDialog: document.querySelector("#printWarningDialog"),
     disablePrintWarningCheckbox: document.querySelector("#disablePrintWarningCheckbox"),
-    previewPrintBtn: document.querySelector("#previewPrintBtn"),
-    closePreviewBtn: document.querySelector("#closePreviewBtn"),
     printBtn: document.querySelector("#printBtn"),
     selectedMeta: document.querySelector("#selectedMeta"),
     selectedIconInput: document.querySelector("#selectedIconInput"),
@@ -54,10 +50,11 @@ const dom = {
     paperSheet: document.querySelector("#paperSheet"),
     labelStrip: document.querySelector("#labelStrip"),
     cellTemplate: document.querySelector("#cellTemplate"),
-    toastNotice: document.querySelector("#toastNotice"),
-    toastNoticeBody: document.querySelector("#toastNoticeBody"),
+    toastContainer: document.querySelector("#toastContainer"),
     footerYear: document.querySelector("#footerYear")
 };
+
+initLogger(dom.toastContainer);
 
 let state = loadState();
 let saveTimerId = 0;
@@ -66,13 +63,22 @@ let iconPicker = null;
 let syncingIconPicker = false;
 let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
-let toast = null;
 
 void init();
 
 async function init() {
     initBadgeColorPresets();
-    initToast();
+
+    window.addEventListener("error", (event) => {
+        console.error("Uncaught error:", event.error ?? event.message);
+        showToast("An unexpected error occurred.", "error");
+    });
+
+    window.addEventListener("unhandledrejection", (event) => {
+        console.error("Unhandled promise rejection:", event.reason);
+        showToast("An unexpected error occurred.", "error");
+    });
+
     dom.footerYear.textContent = String(new Date().getFullYear());
     bindEvents();
     initIconPicker();
@@ -89,16 +95,8 @@ async function init() {
         allIcons = await loadIconCatalog();
         setIconOptions(allIcons);
         render();
-    } catch {
-        setIconOptions([
-            {
-                value: DEFAULT_ICON_NAME,
-                label: "No icon",
-                className: "",
-                searchText: "none no icon empty clear"
-            }
-        ]);
-        dom.layoutStatus.textContent = "Unable to load the full MDI icon catalog. Label editing and printing still work.";
+    } catch (error) {
+        showError("Unable to load the MDI icon catalog. Label editing and printing still work.", error);
     }
 }
 
@@ -139,7 +137,7 @@ function bindEvents() {
     });
 
     dom.selectedIconInput.addEventListener("change", () => {
-        handleIconChange(dom.selectedIconInput.value || DEFAULT_ICON_NAME);
+        handleIconChange(dom.selectedIconInput.value || "");
     });
 
     dom.mergeToggleBtn.addEventListener("click", () => {
@@ -153,13 +151,6 @@ function bindEvents() {
         void loadDemoLayout();
     });
     dom.resetBtn.addEventListener("click", resetState);
-    dom.previewBtn.addEventListener("click", () => {
-        setPreviewMode(true);
-    });
-    dom.closePreviewBtn.addEventListener("click", () => {
-        setPreviewMode(false);
-    });
-    dom.previewPrintBtn.addEventListener("click", handlePrintRequest);
     dom.printBtn.addEventListener("click", handlePrintRequest);
 
     if (dom.printWarningDialog) {
@@ -231,11 +222,6 @@ function render() {
     syncIconPickerValue();
 }
 
-function setPreviewMode(isPreviewing) {
-    document.body.classList.toggle("preview-print", isPreviewing);
-    dom.previewBar.hidden = !isPreviewing;
-}
-
 function handlePrintRequest() {
     if (!state.preferences.showPrintWarning) {
         window.print();
@@ -289,16 +275,6 @@ function initBadgeColorPresets() {
     dom.selectedBadgeColorPreset.replaceChildren(...options);
 }
 
-function initToast() {
-    if (!dom.toastNotice || typeof window.bootstrap?.Toast !== "function") {
-        return;
-    }
-
-    toast = window.bootstrap.Toast.getOrCreateInstance(dom.toastNotice, {
-        delay: 5000
-    });
-}
-
 function handleConfigChange() {
     const nextState = {
         ...state,
@@ -329,7 +305,7 @@ function handleMergeAction() {
     }
 
     if (!canMergeSelection(state.labels, state.selectedIndices)) {
-        dom.layoutStatus.textContent = "Select two or more adjacent unmerged labels to merge them.";
+        showWarning("Select two or more adjacent unmerged labels to merge them.");
         return;
     }
 
@@ -397,7 +373,7 @@ function clearSelectedCells() {
 
     applyToSelected((label) => {
         label.text = "";
-        label.icon = DEFAULT_ICON_NAME;
+        label.icon = "";
         label.badgeColor = DEFAULT_BADGE_COLOR;
     });
 
@@ -531,8 +507,8 @@ function importState(event) {
             render();
             queueSave();
             showToast(`Imported layout from ${file.name}.`);
-        } catch {
-            dom.layoutStatus.textContent = "Import failed. Select a valid JSON layout export.";
+        } catch (error) {
+            showError("Import failed. Select a valid JSON layout export.", error);
         }
     };
     reader.readAsText(file);
@@ -580,8 +556,8 @@ async function loadDemoLayout(options = {}) {
         queueSave();
         showToast(notice);
         return true;
-    } catch {
-        dom.layoutStatus.textContent = "Demo layout could not be loaded.";
+    } catch (error) {
+        showError("Demo layout could not be loaded.", error);
         return false;
     }
 }
@@ -592,12 +568,16 @@ function initIconPicker() {
     }
 
     iconPicker = new window.TomSelect(dom.selectedIconInput, {
+        allowEmptyOption: true,
+        maxItems: 1,
+        plugins: ['clear_button'],
         valueField: "value",
         labelField: "label",
         searchField: ["searchText", "label", "value"],
-        maxOptions: 250,
+        maxOptions: 150,
         create: false,
         preload: false,
+        placeholder: "Select an icon",
         sortField: [
             { field: "$score" },
             { field: "label" }
@@ -615,7 +595,7 @@ function initIconPicker() {
         },
         onChange(value) {
             if (!syncingIconPicker) {
-                handleIconChange(value || DEFAULT_ICON_NAME);
+                handleIconChange(value);
             }
         }
     });
@@ -649,7 +629,7 @@ function syncIconPickerValue() {
     const hasSelection = state.selectedIndices.length > 0;
     const commonIcon = hasSelection ? getCommonSelectedValue("icon") : "";
     const isMixed = hasSelection && commonIcon === null;
-    const nextValue = !hasSelection ? "" : isMixed ? "" : commonIcon || DEFAULT_ICON_NAME;
+    const nextValue = !hasSelection ? "" : isMixed ? "" : commonIcon || "";
 
     if (!iconPicker) {
         dom.selectedIconInput.disabled = !hasSelection;
@@ -664,7 +644,7 @@ function syncIconPickerValue() {
     }
 
     syncingIconPicker = true;
-    iconPicker.settings.placeholder = !hasSelection ? "Select a label to edit" : isMixed ? "Mixed icons" : "Choose an icon";
+    iconPicker.settings.placeholder = !hasSelection ? "Select a label to edit" : isMixed ? "Mixed icons" : "Select an icon";
 
     if (typeof iconPicker.enable === "function" && typeof iconPicker.disable === "function") {
         if (hasSelection) {
@@ -764,18 +744,6 @@ function queueSave() {
     saveTimerId = window.setTimeout(() => {
         saveState(state);
     }, 300);
-}
-
-function showToast(message) {
-    if (!dom.toastNotice || !dom.toastNoticeBody) {
-        return;
-    }
-
-    dom.toastNoticeBody.textContent = message;
-
-    if (toast) {
-        toast.show();
-    }
 }
 
 function getSelectableIndices() {

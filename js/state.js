@@ -1,6 +1,7 @@
 const STORAGE_KEY = "din-rail-label-generator-state";
 
-import { DEFAULT_ICON_NAME, normalizeIconName } from "./icons.js";
+import { normalizeIconName } from "./icons.js";
+import { showError } from "./logger.js";
 
 export const DEFAULT_BADGE_COLOR = "#43a047";
 export const BADGE_COLOR_PRESETS = [
@@ -45,7 +46,8 @@ export function loadState() {
         const normalized = normalizeState(JSON.parse(stored));
         normalized.selectedIndices = [];
         return normalized;
-    } catch {
+    } catch (error) {
+        showError("Failed to restore saved layout, reverting to default.", error);
         return normalizeState(cloneState(DEFAULT_STATE));
     }
 }
@@ -93,7 +95,7 @@ export function normalizeState(inputState) {
         const source = normalized.labels[index] || {};
         return {
             text: typeof source.text === "string" ? source.text : "",
-            icon: typeof source.icon === "string" ? normalizeIconName(source.icon) : DEFAULT_ICON_NAME,
+            icon: typeof source.icon === "string" ? normalizeIconName(source.icon) : "",
             badgeColor: normalizeHexColor(source.badgeColor, DEFAULT_BADGE_COLOR),
             span: clampInt(source.span, 1, 1, normalized.config.slotCount),
             covered: Boolean(source.covered)
@@ -248,7 +250,7 @@ export function isLayoutEmpty(state) {
     }
 
     return normalized.labels.every((label) => label.text === ""
-        && label.icon === DEFAULT_ICON_NAME
+        && label.icon === ""
         && label.badgeColor === DEFAULT_BADGE_COLOR
         && label.span === 1
         && !label.covered);
