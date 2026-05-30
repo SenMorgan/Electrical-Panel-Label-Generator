@@ -130,13 +130,6 @@ body {
     text-transform: uppercase;
 }
 
-.preview-frame__status {
-    border-color: rgba(215, 221, 229, 0.8) !important;
-    border-bottom-left-radius: 1.25rem;
-    border-bottom-right-radius: 1.25rem;
-    background: rgba(255, 255, 255, 0.6);
-}
-
 .label-strip {
     display: flex;
     align-items: flex-start;
@@ -292,7 +285,7 @@ body {
 }
 
 .ts-dropdown-content {
-    max-height: min(300px, 50vh);
+    max-height: min(350px, 50vh);
 }
 
 
