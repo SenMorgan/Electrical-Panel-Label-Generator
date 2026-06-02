@@ -141,12 +141,12 @@ body {
 
 .label-cell {
     flex: 0 0 auto;
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    justify-items: center;
-    align-content: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 1.2mm;
     padding: 0.4mm 0.8mm 0.8mm;
+    overflow: hidden;
     background: #fff;
     color: #000;
     border-radius: 0;
@@ -175,14 +175,13 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 5.8mm;
     padding: 0.2mm 1mm;
     font-size: 2.8mm;
     font-weight: 700;
     letter-spacing: 0.02em;
     color: #fff;
     border-radius: 1mm;
-    line-height: 1;
+    line-height: 1.2;
     background: var(--cell-badge-color, #43a047);
 }
 
@@ -217,17 +216,19 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 9.5mm;
-    height: 9.5mm;
+    width: min(9.5mm, 100%);
+    height: min(9.5mm, calc(var(--cell-h, 30mm) * 0.38));
+    overflow: hidden;
     color: #000;
 }
 
 .cell-icon .mdi {
-    font-size: 7.8mm;
+    font-size: min(7.8mm, calc(var(--cell-h, 30mm) * 0.3));
     line-height: 1;
 }
 
 .cell-text {
+    flex: 1;
     min-height: 0;
     width: 100%;
     font-size: 2.7mm;
@@ -243,6 +244,10 @@ body {
     content: attr(data-placeholder);
     color: #6f7b86;
 }
+
+.label-strip.hide-index .cell-index { display: none; }
+.label-strip.hide-icon .cell-icon { display: none; }
+.label-strip.hide-text .cell-text { display: none; }
 
 .ts-wrapper.single .ts-control,
 .ts-wrapper.single.input-active .ts-control {

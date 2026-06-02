@@ -6,6 +6,7 @@ export function renderApp(dom, state) {
     renderStrip(dom, state);
     renderSelectionPanel(dom, state);
     renderStatus(dom, state);
+    syncPreferenceCheckboxes(dom, state);
 }
 
 export function updateCellText(labelStrip, selectedIndex, text) {
@@ -42,6 +43,12 @@ export function placeCaretAtEnd(element) {
     });
 }
 
+function syncPreferenceCheckboxes(dom, state) {
+    dom.hideCellIndexCheckbox.checked = Boolean(state.layout.hideCellIndex);
+    dom.hideCellIconCheckbox.checked = Boolean(state.layout.hideCellIcon);
+    dom.hideCellTextCheckbox.checked = Boolean(state.layout.hideCellText);
+}
+
 function syncConfigInputs(dom, state) {
     dom.slotCountInput.value = state.config.slotCount;
     dom.cellWidthInput.value = state.config.cellWidth;
@@ -50,6 +57,9 @@ function syncConfigInputs(dom, state) {
 
 function renderStrip(dom, state) {
     dom.labelStrip.replaceChildren();
+    dom.labelStrip.classList.toggle("hide-index", Boolean(state.layout.hideCellIndex));
+    dom.labelStrip.classList.toggle("hide-icon", Boolean(state.layout.hideCellIcon));
+    dom.labelStrip.classList.toggle("hide-text", Boolean(state.layout.hideCellText));
     const selectedIndices = new Set(state.selectedIndices);
     let visibleCellNumber = 0;
 
@@ -69,6 +79,7 @@ function renderStrip(dom, state) {
         cell.dataset.index = String(index);
         cell.style.width = `${state.config.cellWidth * label.span}mm`;
         cell.style.height = `${state.config.cellHeight}mm`;
+        cell.style.setProperty("--cell-h", `${state.config.cellHeight}mm`);
         cell.style.setProperty("--cell-badge-color", label.badgeColor);
         cell.classList.toggle("selected", selectedIndices.has(index));
         cellIndex.textContent = String(visibleCellNumber);
@@ -89,10 +100,10 @@ function renderSelectionPanel(dom, state) {
     const presetMatch = BADGE_COLOR_PRESETS.find((preset) => preset.value === commonBadgeColor);
 
     dom.selectedMeta.textContent = hasSelection ? describeSelection(state) : "No label selected.";
-    dom.selectedTextInput.disabled = !hasSelection;
-    dom.selectedBadgeColorPreset.disabled = !hasSelection;
-    dom.selectedBadgeColorHex.disabled = !hasSelection;
-    dom.selectedIconInput.disabled = !hasSelection;
+    dom.selectedTextInput.disabled = !hasSelection || state.layout.hideCellText;
+    dom.selectedBadgeColorPreset.disabled = !hasSelection || state.layout.hideCellIndex;
+    dom.selectedBadgeColorHex.disabled = !hasSelection || state.layout.hideCellIndex;
+    dom.selectedIconInput.disabled = !hasSelection || state.layout.hideCellIcon;
 
     if (!hasSelection) {
         dom.selectedTextInput.value = "";
