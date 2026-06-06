@@ -27,7 +27,8 @@ export const DEFAULT_STATE = {
     layout: {
         hideCellIndex: false,
         hideCellIcon: false,
-        hideCellText: false
+        hideCellText: false,
+        hideCellGrid: false
     },
     preferences: {
         showPrintWarning: true
@@ -92,7 +93,8 @@ export function normalizeState(inputState) {
         layout: {
             hideCellIndex: Boolean(inputState?.layout?.hideCellIndex),
             hideCellIcon: Boolean(inputState?.layout?.hideCellIcon),
-            hideCellText: Boolean(inputState?.layout?.hideCellText)
+            hideCellText: Boolean(inputState?.layout?.hideCellText),
+            hideCellGrid: Boolean(inputState?.layout?.hideCellGrid)
         },
         preferences: {
             showPrintWarning: inputState?.preferences?.showPrintWarning !== false

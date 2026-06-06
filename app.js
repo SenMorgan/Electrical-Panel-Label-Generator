@@ -50,6 +50,7 @@ const dom = {
     hideCellIndexCheckbox: document.querySelector("#hideCellIndexCheckbox"),
     hideCellIconCheckbox: document.querySelector("#hideCellIconCheckbox"),
     hideCellTextCheckbox: document.querySelector("#hideCellTextCheckbox"),
+    hideCellGridCheckbox: document.querySelector("#hideCellGridCheckbox"),
     paperSheet: document.querySelector("#paperSheet"),
     labelStrip: document.querySelector("#labelStrip"),
     cellTemplate: document.querySelector("#cellTemplate"),
@@ -147,12 +148,14 @@ function bindEvents() {
         state.layout.hideCellIndex = dom.hideCellIndexCheckbox.checked;
         state.layout.hideCellIcon = dom.hideCellIconCheckbox.checked;
         state.layout.hideCellText = dom.hideCellTextCheckbox.checked;
+        state.layout.hideCellGrid = dom.hideCellGridCheckbox.checked;
         render();
         queueSave();
     };
     dom.hideCellIndexCheckbox.addEventListener("change", handlePreferenceChange);
     dom.hideCellIconCheckbox.addEventListener("change", handlePreferenceChange);
     dom.hideCellTextCheckbox.addEventListener("change", handlePreferenceChange);
+    dom.hideCellGridCheckbox.addEventListener("change", handlePreferenceChange);
 
     dom.mergeToggleBtn.addEventListener("click", () => {
         handleMergeAction();

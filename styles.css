@@ -81,16 +81,16 @@ body {
     position: relative;
 }
 
-.inspector > .panel:first-child,
-.inspector > .panel:first-child .card-body {
+.inspector>.panel:first-child,
+.inspector>.panel:first-child .card-body {
     overflow: visible;
 }
 
-.inspector > .panel:first-child {
+.inspector>.panel:first-child {
     z-index: 3;
 }
 
-.inspector > .panel:last-child {
+.inspector>.panel:last-child {
     z-index: 1;
 }
 
@@ -245,9 +245,22 @@ body {
     color: #6f7b86;
 }
 
-.label-strip.hide-index .cell-index { display: none; }
-.label-strip.hide-icon .cell-icon { display: none; }
-.label-strip.hide-text .cell-text { display: none; }
+.label-strip.hide-index .cell-index {
+    display: none;
+}
+
+.label-strip.hide-icon .cell-icon {
+    display: none;
+}
+
+.label-strip.hide-text .cell-text {
+    display: none;
+}
+
+.label-strip.hide-grid,
+.label-strip.hide-grid .label-cell {
+    border-color: transparent;
+}
 
 .ts-wrapper.single .ts-control,
 .ts-wrapper.single.input-active .ts-control {

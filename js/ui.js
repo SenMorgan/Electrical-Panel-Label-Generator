@@ -47,6 +47,7 @@ function syncPreferenceCheckboxes(dom, state) {
     dom.hideCellIndexCheckbox.checked = Boolean(state.layout.hideCellIndex);
     dom.hideCellIconCheckbox.checked = Boolean(state.layout.hideCellIcon);
     dom.hideCellTextCheckbox.checked = Boolean(state.layout.hideCellText);
+    dom.hideCellGridCheckbox.checked = Boolean(state.layout.hideCellGrid);
 }
 
 function syncConfigInputs(dom, state) {
@@ -60,6 +61,7 @@ function renderStrip(dom, state) {
     dom.labelStrip.classList.toggle("hide-index", Boolean(state.layout.hideCellIndex));
     dom.labelStrip.classList.toggle("hide-icon", Boolean(state.layout.hideCellIcon));
     dom.labelStrip.classList.toggle("hide-text", Boolean(state.layout.hideCellText));
+    dom.labelStrip.classList.toggle("hide-grid", Boolean(state.layout.hideCellGrid));
     const selectedIndices = new Set(state.selectedIndices);
     let visibleCellNumber = 0;
 
