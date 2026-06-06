@@ -118,7 +118,7 @@ function renderSelectionPanel(dom, state) {
         dom.selectedBadgeColorChip.setAttribute("title", "No selection");
         dom.mergeToggleBtn.hidden = true;
         dom.mergeToggleBtn.disabled = true;
-        dom.mergeToggleBtn.innerHTML = '<i class="mdi mdi-table-merge-cells me-2"></i>Merge Selected Cells';
+        dom.mergeToggleBtn.innerHTML = '<i class="mdi mdi-table-merge-cells me-1"></i>Merge Selected Cells';
         return;
     }
 
@@ -135,8 +135,8 @@ function renderSelectionPanel(dom, state) {
     dom.mergeToggleBtn.hidden = !(canMerge || canSplit);
     dom.mergeToggleBtn.disabled = !(canMerge || canSplit);
     dom.mergeToggleBtn.innerHTML = canSplit
-        ? '<i class="mdi mdi-table-split-cell me-2"></i>Split Cell'
-        : '<i class="mdi mdi-table-merge-cells me-2"></i>Merge Cells';
+        ? '<i class="mdi mdi-table-split-cell me-1"></i>Split Cell'
+        : '<i class="mdi mdi-table-merge-cells me-1"></i>Merge Cells';
 }
 
 function renderStatus(dom, state) {

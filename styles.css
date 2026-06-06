@@ -274,11 +274,6 @@ body {
     z-index: 4;
 }
 
-.ts-wrapper.single .ts-control,
-.ts-dropdown {
-    border-radius: 0.75rem;
-}
-
 .ts-wrapper.focus .ts-control {
     border-color: rgba(13, 110, 253, 0.6);
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.16);
