@@ -6,6 +6,7 @@ export function renderApp(dom, state) {
     renderStrip(dom, state);
     renderSelectionPanel(dom, state);
     renderStatus(dom, state);
+    syncPreferenceCheckboxes(dom, state);
 }
 
 export function updateCellText(labelStrip, selectedIndex, text) {
@@ -42,6 +43,13 @@ export function placeCaretAtEnd(element) {
     });
 }
 
+function syncPreferenceCheckboxes(dom, state) {
+    dom.hideCellIndexCheckbox.checked = Boolean(state.layout.hideCellIndex);
+    dom.hideCellIconCheckbox.checked = Boolean(state.layout.hideCellIcon);
+    dom.hideCellTextCheckbox.checked = Boolean(state.layout.hideCellText);
+    dom.hideCellGridCheckbox.checked = Boolean(state.layout.hideCellGrid);
+}
+
 function syncConfigInputs(dom, state) {
     dom.slotCountInput.value = state.config.slotCount;
     dom.cellWidthInput.value = state.config.cellWidth;
@@ -50,6 +58,10 @@ function syncConfigInputs(dom, state) {
 
 function renderStrip(dom, state) {
     dom.labelStrip.replaceChildren();
+    dom.labelStrip.classList.toggle("hide-index", Boolean(state.layout.hideCellIndex));
+    dom.labelStrip.classList.toggle("hide-icon", Boolean(state.layout.hideCellIcon));
+    dom.labelStrip.classList.toggle("hide-text", Boolean(state.layout.hideCellText));
+    dom.labelStrip.classList.toggle("hide-grid", Boolean(state.layout.hideCellGrid));
     const selectedIndices = new Set(state.selectedIndices);
     let visibleCellNumber = 0;
 
@@ -69,6 +81,7 @@ function renderStrip(dom, state) {
         cell.dataset.index = String(index);
         cell.style.width = `${state.config.cellWidth * label.span}mm`;
         cell.style.height = `${state.config.cellHeight}mm`;
+        cell.style.setProperty("--cell-h", `${state.config.cellHeight}mm`);
         cell.style.setProperty("--cell-badge-color", label.badgeColor);
         cell.classList.toggle("selected", selectedIndices.has(index));
         cellIndex.textContent = String(visibleCellNumber);
@@ -89,10 +102,10 @@ function renderSelectionPanel(dom, state) {
     const presetMatch = BADGE_COLOR_PRESETS.find((preset) => preset.value === commonBadgeColor);
 
     dom.selectedMeta.textContent = hasSelection ? describeSelection(state) : "No label selected.";
-    dom.selectedTextInput.disabled = !hasSelection;
-    dom.selectedBadgeColorPreset.disabled = !hasSelection;
-    dom.selectedBadgeColorHex.disabled = !hasSelection;
-    dom.selectedIconInput.disabled = !hasSelection;
+    dom.selectedTextInput.disabled = !hasSelection || state.layout.hideCellText;
+    dom.selectedBadgeColorPreset.disabled = !hasSelection || state.layout.hideCellIndex;
+    dom.selectedBadgeColorHex.disabled = !hasSelection || state.layout.hideCellIndex;
+    dom.selectedIconInput.disabled = !hasSelection || state.layout.hideCellIcon;
 
     if (!hasSelection) {
         dom.selectedTextInput.value = "";
@@ -105,7 +118,7 @@ function renderSelectionPanel(dom, state) {
         dom.selectedBadgeColorChip.setAttribute("title", "No selection");
         dom.mergeToggleBtn.hidden = true;
         dom.mergeToggleBtn.disabled = true;
-        dom.mergeToggleBtn.textContent = "Merge Selected Cells";
+        dom.mergeToggleBtn.innerHTML = '<i class="mdi mdi-table-merge-cells me-2"></i>Merge Selected Cells';
         return;
     }
 
@@ -121,7 +134,9 @@ function renderSelectionPanel(dom, state) {
     dom.selectedBadgeColorChip.setAttribute("title", commonBadgeColor ?? "Mixed colors");
     dom.mergeToggleBtn.hidden = !(canMerge || canSplit);
     dom.mergeToggleBtn.disabled = !(canMerge || canSplit);
-    dom.mergeToggleBtn.textContent = canSplit ? "Split Merged Cell" : "Merge Selected Cells";
+    dom.mergeToggleBtn.innerHTML = canSplit
+        ? '<i class="mdi mdi-table-split-cell me-2"></i>Split Cell'
+        : '<i class="mdi mdi-table-merge-cells me-2"></i>Merge Cells';
 }
 
 function renderStatus(dom, state) {

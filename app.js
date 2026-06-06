@@ -47,6 +47,10 @@ const dom = {
     selectedBadgeColorChip: document.querySelector("#selectedBadgeColorChip"),
     mergeToggleBtn: document.querySelector("#mergeToggleBtn"),
     layoutStatus: document.querySelector("#layoutStatus"),
+    hideCellIndexCheckbox: document.querySelector("#hideCellIndexCheckbox"),
+    hideCellIconCheckbox: document.querySelector("#hideCellIconCheckbox"),
+    hideCellTextCheckbox: document.querySelector("#hideCellTextCheckbox"),
+    hideCellGridCheckbox: document.querySelector("#hideCellGridCheckbox"),
     paperSheet: document.querySelector("#paperSheet"),
     labelStrip: document.querySelector("#labelStrip"),
     cellTemplate: document.querySelector("#cellTemplate"),
@@ -139,6 +143,19 @@ function bindEvents() {
     dom.selectedIconInput.addEventListener("change", () => {
         handleIconChange(dom.selectedIconInput.value || "");
     });
+
+    const handlePreferenceChange = () => {
+        state.layout.hideCellIndex = dom.hideCellIndexCheckbox.checked;
+        state.layout.hideCellIcon = dom.hideCellIconCheckbox.checked;
+        state.layout.hideCellText = dom.hideCellTextCheckbox.checked;
+        state.layout.hideCellGrid = dom.hideCellGridCheckbox.checked;
+        render();
+        queueSave();
+    };
+    dom.hideCellIndexCheckbox.addEventListener("change", handlePreferenceChange);
+    dom.hideCellIconCheckbox.addEventListener("change", handlePreferenceChange);
+    dom.hideCellTextCheckbox.addEventListener("change", handlePreferenceChange);
+    dom.hideCellGridCheckbox.addEventListener("change", handlePreferenceChange);
 
     dom.mergeToggleBtn.addEventListener("click", () => {
         handleMergeAction();
@@ -602,8 +619,6 @@ function initIconPicker() {
 }
 
 function setIconOptions(icons) {
-    dom.selectedIconInput.disabled = false;
-
     if (!iconPicker) {
         const optionElements = icons.map((icon) => {
             const option = document.createElement("option");
@@ -631,8 +646,10 @@ function syncIconPickerValue() {
     const isMixed = hasSelection && commonIcon === null;
     const nextValue = !hasSelection ? "" : isMixed ? "" : commonIcon || "";
 
+    const canEditIcon = hasSelection && !state.layout.hideCellIcon;
+
     if (!iconPicker) {
-        dom.selectedIconInput.disabled = !hasSelection;
+        dom.selectedIconInput.disabled = !canEditIcon;
 
         if (nextValue) {
             dom.selectedIconInput.value = nextValue;
@@ -644,10 +661,19 @@ function syncIconPickerValue() {
     }
 
     syncingIconPicker = true;
-    iconPicker.settings.placeholder = !hasSelection ? "Select a label to edit" : isMixed ? "Mixed icons" : "Select an icon";
+    // Placeholder should reflect selection state and whether icons are hidden
+    if (state.layout.hideCellIcon) {
+        iconPicker.settings.placeholder = "Icons hidden";
+    } else if (!hasSelection) {
+        iconPicker.settings.placeholder = "Select a label to edit";
+    } else if (isMixed) {
+        iconPicker.settings.placeholder = "Mixed icons";
+    } else {
+        iconPicker.settings.placeholder = "Select an icon";
+    }
 
     if (typeof iconPicker.enable === "function" && typeof iconPicker.disable === "function") {
-        if (hasSelection) {
+        if (canEditIcon) {
             iconPicker.enable();
         } else {
             iconPicker.disable();

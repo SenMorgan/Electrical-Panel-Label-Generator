@@ -24,6 +24,12 @@ export const DEFAULT_STATE = {
         cellWidth: 18,
         cellHeight: 30
     },
+    layout: {
+        hideCellIndex: false,
+        hideCellIcon: false,
+        hideCellText: false,
+        hideCellGrid: false
+    },
     preferences: {
         showPrintWarning: true
     },
@@ -61,6 +67,7 @@ export function createPersistedState(state) {
 
     return {
         config: normalized.config,
+        layout: normalized.layout,
         preferences: normalized.preferences,
         labels: normalized.labels
     };
@@ -71,6 +78,7 @@ export function createExportState(state) {
 
     return {
         config: normalized.config,
+        layout: normalized.layout,
         labels: normalized.labels
     };
 }
@@ -81,6 +89,12 @@ export function normalizeState(inputState) {
             slotCount: clampInt(inputState?.config?.slotCount, 14, 1, 42),
             cellWidth: clampNumber(inputState?.config?.cellWidth, 18, 8, 50),
             cellHeight: clampNumber(inputState?.config?.cellHeight, 30, 10, 60)
+        },
+        layout: {
+            hideCellIndex: Boolean(inputState?.layout?.hideCellIndex),
+            hideCellIcon: Boolean(inputState?.layout?.hideCellIcon),
+            hideCellText: Boolean(inputState?.layout?.hideCellText),
+            hideCellGrid: Boolean(inputState?.layout?.hideCellGrid)
         },
         preferences: {
             showPrintWarning: inputState?.preferences?.showPrintWarning !== false

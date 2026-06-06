@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electrical Panel Label Generator</title>
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="icons/favicon.ico">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="styles.css">
@@ -16,11 +16,11 @@
         <header class="app-header card border-0 shadow-sm mb-3">
             <div class="card-body d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
-                    <h1 class="display-6 fw-semibold mb-2">Electrical Panel Label Generator</h1>
+                    <h1 class="display-6 fw-semibold mb-2"><img src="icons/danger.png" alt="" class="title-icon">Electrical Panel Label Generator</h1>
                     <p class="text-secondary mb-0">Printable breaker label layout creator with live preview and JSON import/export. Set custom label text, icons, and colors for each breaker slot.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
-                    <button type="button" id="printBtn" class="btn btn-primary">Print</button>
+                    <button type="button" id="printBtn" class="btn btn-primary"><i class="mdi mdi-printer me-2"></i>Print</button>
                 </div>
             </div>
         </header>
@@ -44,13 +44,32 @@
                             </div>
                         </div>
                         <p id="layoutStatus" class="text-secondary small mt-2 mb-0"></p>
+                        <div class="d-flex flex-wrap align-items-center gap-3 mt-2">
+                            <span class="text-secondary small">Hide:</span>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="hideCellIndexCheckbox">
+                                <label class="form-check-label small" for="hideCellIndexCheckbox">Index</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="hideCellIconCheckbox">
+                                <label class="form-check-label small" for="hideCellIconCheckbox">Icon</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="hideCellTextCheckbox">
+                                <label class="form-check-label small" for="hideCellTextCheckbox">Text</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="hideCellGridCheckbox">
+                                <label class="form-check-label small" for="hideCellGridCheckbox">Grid</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-12 col-xl-6 align-self-xl-center">
                         <div class="d-grid d-md-flex gap-2 justify-content-xl-end">
-                            <button type="button" id="exportBtn" class="btn btn-outline-secondary">Export JSON</button>
-                            <button type="button" id="importBtn" class="btn btn-outline-secondary">Import JSON</button>
-                            <button type="button" id="loadDemoBtn" class="btn btn-outline-secondary">Load Demo</button>
-                            <button type="button" id="resetBtn" class="btn btn-outline-danger">Reset Layout</button>
+                            <button type="button" id="exportBtn" class="btn btn-outline-secondary"><i class="mdi mdi-download me-2"></i>Export JSON</button>
+                            <button type="button" id="importBtn" class="btn btn-outline-secondary"><i class="mdi mdi-upload me-2"></i>Import JSON</button>
+                            <button type="button" id="loadDemoBtn" class="btn btn-outline-secondary"><i class="mdi mdi-folder-open me-2"></i>Load Demo</button>
+                            <button type="button" id="resetBtn" class="btn btn-outline-danger"><i class="mdi mdi-refresh me-2"></i>Reset Layout</button>
                         </div>
                     </div>
                 </div>
@@ -60,7 +79,7 @@
 
         <main class="workspace row g-3 align-items-start">
             <aside class="inspector d-print-none col-12 col-xxl-3" aria-label="Selected cell editor">
-                <div class="panel card border-0 shadow-sm mb-3">
+                <div class="panel card border-0 shadow-sm">
                     <div class="card-body">
                         <h2 class="h3 mb-1">Selected Label</h2>
                         <p id="selectedMeta" class="text-secondary small mb-3"></p>
@@ -81,14 +100,17 @@
                                 </div>
                             </div>
                             <div class="col-sm-5">
-                                <label class="form-label" for="selectedBadgeColorHex">HEX</label>
+                                <label class="form-label" for="selectedBadgeColorHex"><i class="mdi mdi-palette me-1"></i>HEX</label>
                                 <input id="selectedBadgeColorHex" class="form-control text-uppercase" type="text" inputmode="text" spellcheck="false" maxlength="7" placeholder="#43A047">
                             </div>
                         </div>
                         <div class="d-grid gap-2">
-                            <button type="button" id="mergeToggleBtn" class="btn btn-primary" hidden>Merge Selected Cells</button>
+                            <button type="button" id="mergeToggleBtn" class="btn btn-primary" hidden></button>
                         </div>
-                        <p class="hint text-secondary small mt-3 mb-0">Click any preview cell text to edit directly. Shift+click selects a range, Ctrl/Cmd+click adds or removes cells, Delete clears the current cell or selected range.</p>
+                        <p class="text-secondary small mt-1 mb-0">
+                            <i class="mdi mdi-information"></i>
+                            Click any preview cell to edit directly. <i>Shift+click</i> selects a range, <i>Ctrl/Cmd+click</i> adds or removes cells to selection, <i>Delete</i> clears the current cell or selected range.
+                        </p>
                     </div>
                 </div>
 
@@ -119,15 +141,16 @@
 
         <dialog id="printWarningDialog" class="print-warning-dialog">
             <form method="dialog" class="print-warning-card">
-                <h2 class="h4 mb-2">Before printing</h2>
+                <h2 class="h4 mb-2">
+                    <i class="mdi mdi-alert text-warning me-2"></i>Before printing</h2>
                 <p class="text-secondary mb-3">Set printer scale to 100% in the printer settings so the label sizes stay accurate in millimeters.</p>
                 <label class="form-check mb-3" for="disablePrintWarningCheckbox">
                     <input id="disablePrintWarningCheckbox" class="form-check-input" type="checkbox">
                     <span class="form-check-label">Do not show this warning again</span>
                 </label>
                 <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" value="cancel" class="btn btn-outline-secondary">Cancel</button>
-                    <button type="submit" value="confirm" class="btn btn-primary">Continue to Print</button>
+                    <button type="submit" value="cancel" class="btn btn-outline-secondary"><i class="mdi mdi-close me-2"></i>Cancel</button>
+                    <button type="submit" value="confirm" class="btn btn-primary"><i class="mdi mdi-check me-2"></i>Continue to Print</button>
                 </div>
             </form>
         </dialog>

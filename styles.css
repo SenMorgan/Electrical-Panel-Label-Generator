@@ -5,8 +5,6 @@
     --muted: #4d5b69;
     --accent: #0d6efd;
     --accent-soft: #d7e7ff;
-    --cell-green: #68b24b;
-    --cell-orange: #ef941a;
     --shadow: 0 18px 48px rgba(18, 38, 63, 0.12);
     --sheet-shadow: 0 14px 34px rgba(18, 38, 63, 0.14);
     --paper-width: 297mm;
@@ -29,6 +27,15 @@ body {
 
 .app-shell {
     min-height: 100vh;
+}
+
+.title-icon {
+    display: inline-block;
+    height: 1em;
+    width: auto;
+    margin-right: 0.2em;
+    vertical-align: -0.125em;
+    line-height: 1;
 }
 
 .app-footer {
@@ -81,16 +88,16 @@ body {
     position: relative;
 }
 
-.inspector > .panel:first-child,
-.inspector > .panel:first-child .card-body {
+.inspector>.panel:first-child,
+.inspector>.panel:first-child .card-body {
     overflow: visible;
 }
 
-.inspector > .panel:first-child {
+.inspector>.panel:first-child {
     z-index: 3;
 }
 
-.inspector > .panel:last-child {
+.inspector>.panel:last-child {
     z-index: 1;
 }
 
@@ -102,13 +109,6 @@ body {
 
 .preview-column {
     min-width: 0;
-}
-
-.preview-frame {
-    overflow: auto;
-    border-radius: 1.25rem;
-    background: radial-gradient(circle at 12mm 12mm, rgba(215, 221, 229, 0.95) 1px, transparent 1px);
-    background-size: 24px 24px;
 }
 
 .paper-sheet {
@@ -141,12 +141,12 @@ body {
 
 .label-cell {
     flex: 0 0 auto;
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    justify-items: center;
-    align-content: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 1.2mm;
     padding: 0.4mm 0.8mm 0.8mm;
+    overflow: hidden;
     background: #fff;
     color: #000;
     border-radius: 0;
@@ -163,7 +163,6 @@ body {
         inset 0 0 0 0.35mm rgba(255, 255, 255, 0.95),
         0 0 0 0.7mm var(--accent),
         0 2.4mm 5mm rgba(13, 110, 253, 0.24);
-    background: linear-gradient(180deg, rgba(215, 231, 255, 0.72) 0%, rgba(255, 255, 255, 0.98) 100%);
 }
 
 .cell-head {
@@ -175,14 +174,13 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 5.8mm;
     padding: 0.2mm 1mm;
     font-size: 2.8mm;
     font-weight: 700;
     letter-spacing: 0.02em;
     color: #fff;
     border-radius: 1mm;
-    line-height: 1;
+    line-height: 1.2;
     background: var(--cell-badge-color, #43a047);
 }
 
@@ -217,17 +215,19 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 9.5mm;
-    height: 9.5mm;
+    width: min(9.5mm, 100%);
+    height: min(9.5mm, calc(var(--cell-h, 30mm) * 0.38));
+    overflow: hidden;
     color: #000;
 }
 
 .cell-icon .mdi {
-    font-size: 7.8mm;
+    font-size: min(7.8mm, calc(var(--cell-h, 30mm) * 0.3));
     line-height: 1;
 }
 
 .cell-text {
+    flex: 1;
     min-height: 0;
     width: 100%;
     font-size: 2.7mm;
@@ -242,6 +242,23 @@ body {
 .cell-text:empty::before {
     content: attr(data-placeholder);
     color: #6f7b86;
+}
+
+.label-strip.hide-index .cell-index {
+    display: none;
+}
+
+.label-strip.hide-icon .cell-icon {
+    display: none;
+}
+
+.label-strip.hide-text .cell-text {
+    display: none;
+}
+
+.label-strip.hide-grid,
+.label-strip.hide-grid .label-cell {
+    border-color: transparent;
 }
 
 .ts-wrapper.single .ts-control,
