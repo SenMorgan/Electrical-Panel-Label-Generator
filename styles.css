@@ -29,6 +29,15 @@ body {
     min-height: 100vh;
 }
 
+.title-icon {
+    display: inline-block;
+    height: 1em;
+    width: auto;
+    margin-right: 0.2em;
+    vertical-align: -0.125em;
+    line-height: 1;
+}
+
 .app-footer {
     color: var(--muted);
 }
