@@ -92,8 +92,20 @@
                             <select id="selectedIconInput" class="form-select" autocomplete="off"></select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="selectedTextInput">Description</label>
-                            <input id="selectedTextInput" class="form-control" type="text" maxlength="150" placeholder="Breaker description">
+                            <label class="form-label">Description</label>
+                            <div id="selectedTextInput" class="form-control rich-text-editor" contenteditable="true"
+                                spellcheck="false" data-placeholder="Breaker description (supports bold, italic, underline)"></div>
+                            <div class="rich-text-toolbar btn-group btn-group-sm w-100 d-flex mt-2" role="toolbar" aria-label="Text formatting">
+                                <button type="button" id="textBoldBtn" class="btn btn-sm btn-outline-secondary" title="Bold (Ctrl+B)">
+                                    <i class="mdi mdi-format-bold"></i>
+                                </button>
+                                <button type="button" id="textItalicBtn" class="btn btn-sm btn-outline-secondary" title="Italic (Ctrl+I)">
+                                    <i class="mdi mdi-format-italic"></i>
+                                </button>
+                                <button type="button" id="textUnderlineBtn" class="btn btn-sm btn-outline-secondary" title="Underline (Ctrl+U)">
+                                    <i class="mdi mdi-format-underline"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="row g-2 mb-3">
                             <div class="col-sm-7">
@@ -111,7 +123,7 @@
                         <div class="d-grid gap-2">
                             <button type="button" id="mergeToggleBtn" class="btn btn-primary" hidden></button>
                         </div>
-                        <p class="text-secondary small mt-1 mb-0">
+                        <p class="text-secondary small mt-3 mb-0">
                             <i class="mdi mdi-information"></i>
                             Click any preview cell to edit directly. <i>Shift+click</i> selects a range, <i>Ctrl/Cmd+click</i> adds or removes cells to selection, <i>Delete</i> clears the current cell or selected range.
                         </p>

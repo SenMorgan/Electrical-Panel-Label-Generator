@@ -1,5 +1,6 @@
 import { buildIconClassName, normalizeIconName } from "./icons.js";
 import { BADGE_COLOR_PRESETS, canMergeSelection, canSplitSelection } from "./state.js";
+import { setEditorContent, htmlToPlainText } from "./richtext.js";
 
 export function renderApp(dom, state) {
     syncConfigInputs(dom, state);
@@ -12,8 +13,8 @@ export function renderApp(dom, state) {
 export function updateCellText(labelStrip, selectedIndex, text) {
     const selectedText = labelStrip.querySelector(`[data-index="${selectedIndex}"] .cell-text`);
 
-    if (selectedText && selectedText.textContent !== text) {
-        selectedText.textContent = text;
+    if (selectedText && selectedText.innerHTML !== text) {
+        selectedText.innerHTML = text;
     }
 }
 
@@ -88,7 +89,7 @@ function renderStrip(dom, state) {
         cell.classList.toggle("selected", selectedIndices.has(index));
         cellIndex.textContent = String(visibleCellNumber);
         cellIcon.innerHTML = renderIconPreview(label.icon, "cell");
-        cellText.textContent = label.text;
+        cellText.innerHTML = label.text ?? "";
         cellText.setAttribute("aria-label", `Label ${visibleCellNumber} description`);
         dom.labelStrip.append(cell);
     });
@@ -110,7 +111,7 @@ function renderSelectionPanel(dom, state) {
     dom.selectedIconInput.disabled = !hasSelection || state.layout.hideCellIcon;
 
     if (!hasSelection) {
-        dom.selectedTextInput.value = "";
+        setEditorContent(dom.selectedTextInput, "");
         dom.selectedTextInput.placeholder = "Select a label to edit";
         dom.selectedBadgeColorPreset.value = "";
         dom.selectedBadgeColorHex.value = "";
@@ -124,7 +125,7 @@ function renderSelectionPanel(dom, state) {
         return;
     }
 
-    dom.selectedTextInput.value = commonText ?? "";
+    setEditorContent(dom.selectedTextInput, commonText ?? "");
     dom.selectedTextInput.placeholder = commonText === null
         ? `Type to update ${selectedLabels.length} labels at once`
         : "Breaker description";
