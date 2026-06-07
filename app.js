@@ -378,9 +378,62 @@ function handleDocumentKeydown(event) {
         return;
     }
 
-    if (!event.ctrlKey && !event.metaKey && !event.altKey && isNavigationKey(event.key)) {
-        if (shouldHandleArrowNavigation(event.target) && moveSelection(event.key)) {
-            event.preventDefault();
+    if (!event.altKey && isNavigationKey(event.key)) {
+        if (shouldHandleArrowNavigation(event.target)) {
+            const isShiftHeld = event.shiftKey;
+            const isCtrlHeld = event.ctrlKey || event.metaKey;
+
+            if (isShiftHeld || isCtrlHeld) {
+                // Extend or toggle selection with shift/ctrl + arrow
+                const selectableIndices = getSelectableIndices();
+
+                if (!selectableIndices.length) {
+                    return;
+                }
+
+                if (!state.selectedIndices.length) {
+                    selectCell(selectableIndices[0]);
+                    event.preventDefault();
+                    return;
+                }
+
+                // For extend mode, move from the frontier (the end of selection being extended)
+                // The frontier is the selected index that's farthest from the anchor
+                let currentIndex;
+                if (isShiftHeld) {
+                    let frontier = selectionAnchorIndex;
+                    for (const idx of state.selectedIndices) {
+                        if (Math.abs(idx - selectionAnchorIndex) > Math.abs(frontier - selectionAnchorIndex)) {
+                            frontier = idx;
+                        }
+                    }
+                    currentIndex = frontier;
+                } else {
+                    // For toggle mode, use anchor or first selected
+                    currentIndex = state.selectedIndices.includes(selectionAnchorIndex)
+                        ? selectionAnchorIndex
+                        : state.selectedIndices[0];
+                }
+
+                const visibleIndex = selectableIndices.indexOf(currentIndex);
+
+                if (visibleIndex < 0) {
+                    return;
+                }
+
+                const step = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+                const nextVisibleIndex = Math.min(selectableIndices.length - 1, Math.max(0, visibleIndex + step));
+
+                if (nextVisibleIndex !== visibleIndex) {
+                    selectCell(selectableIndices[nextVisibleIndex], {
+                        extend: isShiftHeld,
+                        toggle: isCtrlHeld
+                    });
+                }
+                event.preventDefault();
+            } else if (moveSelection(event.key)) {
+                event.preventDefault();
+            }
         }
 
         return;
