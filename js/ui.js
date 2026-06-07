@@ -54,6 +54,7 @@ function syncConfigInputs(dom, state) {
     dom.slotCountInput.value = state.config.slotCount;
     dom.cellWidthInput.value = state.config.cellWidth;
     dom.cellHeightInput.value = state.config.cellHeight;
+    dom.cellFontSizeInput.value = state.config.cellFontSize;
 }
 
 function renderStrip(dom, state) {
@@ -62,6 +63,7 @@ function renderStrip(dom, state) {
     dom.labelStrip.classList.toggle("hide-icon", Boolean(state.layout.hideCellIcon));
     dom.labelStrip.classList.toggle("hide-text", Boolean(state.layout.hideCellText));
     dom.labelStrip.classList.toggle("hide-grid", Boolean(state.layout.hideCellGrid));
+    dom.labelStrip.style.setProperty("--cell-font-size", `${state.config.cellFontSize}mm`);
     const selectedIndices = new Set(state.selectedIndices);
     let visibleCellNumber = 0;
 

@@ -26,18 +26,22 @@ import {
     updateCellText
 } from "./js/ui.js";
 import { initLogger, showToast, showError, showWarning } from "./js/logger.js";
+import {
+    createPrintWarningModal,
+    createResetConfirmModal,
+    createLoadDemoConfirmModal
+} from "./js/modals.js";
 
 const dom = {
     slotCountInput: document.querySelector("#slotCountInput"),
     cellWidthInput: document.querySelector("#cellWidthInput"),
     cellHeightInput: document.querySelector("#cellHeightInput"),
+    cellFontSizeInput: document.querySelector("#cellFontSizeInput"),
     exportBtn: document.querySelector("#exportBtn"),
     importBtn: document.querySelector("#importBtn"),
     importFileInput: document.querySelector("#importFileInput"),
     loadDemoBtn: document.querySelector("#loadDemoBtn"),
     resetBtn: document.querySelector("#resetBtn"),
-    printWarningDialog: document.querySelector("#printWarningDialog"),
-    disablePrintWarningCheckbox: document.querySelector("#disablePrintWarningCheckbox"),
     printBtn: document.querySelector("#printBtn"),
     selectedMeta: document.querySelector("#selectedMeta"),
     selectedIconInput: document.querySelector("#selectedIconInput"),
@@ -67,6 +71,14 @@ let iconPicker = null;
 let syncingIconPicker = false;
 let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
+let previousSelectionIndices = [];
+let pendingDemoLoadOptions = null;
+
+// Modal references
+let printWarningModal = null;
+let disablePrintWarningCheckbox = null;
+let resetConfirmModal = null;
+let loadDemoConfirmModal = null;
 
 void init();
 
@@ -102,12 +114,25 @@ async function init() {
     } catch (error) {
         showError("Unable to load the MDI icon catalog. Label editing and printing still work.", error);
     }
+
+    // Initialize modals
+    const printWarning = createPrintWarningModal(handlePrintWarningConfirm);
+    printWarningModal = window.bootstrap.Modal.getOrCreateInstance(printWarning.element);
+    disablePrintWarningCheckbox = printWarning.checkbox;
+
+    const resetConfirm = createResetConfirmModal(handleResetConfirm);
+    resetConfirmModal = window.bootstrap.Modal.getOrCreateInstance(resetConfirm.element);
+
+    const loadDemoConfirm = createLoadDemoConfirmModal(handleLoadDemoConfirm);
+    loadDemoConfirmModal = window.bootstrap.Modal.getOrCreateInstance(loadDemoConfirm.element);
+
 }
 
 function bindEvents() {
     dom.slotCountInput.addEventListener("change", handleConfigChange);
     dom.cellWidthInput.addEventListener("change", handleConfigChange);
     dom.cellHeightInput.addEventListener("change", handleConfigChange);
+    dom.cellFontSizeInput.addEventListener("change", handleConfigChange);
     document.addEventListener("keydown", handleDocumentKeydown, true);
     document.addEventListener("pointerdown", handleDocumentPointerDown);
 
@@ -169,13 +194,6 @@ function bindEvents() {
     });
     dom.resetBtn.addEventListener("click", resetState);
     dom.printBtn.addEventListener("click", handlePrintRequest);
-
-    if (dom.printWarningDialog) {
-        dom.printWarningDialog.addEventListener("close", handlePrintWarningClose);
-        dom.printWarningDialog.addEventListener("cancel", () => {
-            dom.disablePrintWarningCheckbox.checked = false;
-        });
-    }
 
     dom.labelStrip.addEventListener("mousedown", (event) => {
         const cell = event.target.closest("[data-index]");
@@ -245,7 +263,7 @@ function handlePrintRequest() {
         return;
     }
 
-    if (typeof dom.printWarningDialog?.showModal !== "function") {
+    if (!printWarningModal) {
         const confirmed = window.confirm("Set printer scale to 100% in the printer settings so the label sizes stay accurate in millimeters.");
 
         if (confirmed) {
@@ -255,26 +273,20 @@ function handlePrintRequest() {
         return;
     }
 
-    dom.disablePrintWarningCheckbox.checked = false;
-    dom.printWarningDialog.showModal();
+    disablePrintWarningCheckbox.checked = false;
+    printWarningModal.show();
 }
 
-function handlePrintWarningClose() {
-    const shouldPrint = dom.printWarningDialog.returnValue === "confirm";
-
-    if (!shouldPrint) {
-        dom.disablePrintWarningCheckbox.checked = false;
-        return;
-    }
-
-    const nextShowPrintWarning = !dom.disablePrintWarningCheckbox.checked;
+function handlePrintWarningConfirm() {
+    const nextShowPrintWarning = !disablePrintWarningCheckbox.checked;
 
     if (state.preferences.showPrintWarning !== nextShowPrintWarning) {
         state.preferences.showPrintWarning = nextShowPrintWarning;
         queueSave();
     }
 
-    dom.disablePrintWarningCheckbox.checked = false;
+    disablePrintWarningCheckbox.checked = false;
+    printWarningModal?.hide();
     window.print();
 }
 
@@ -298,7 +310,8 @@ function handleConfigChange() {
         config: {
             slotCount: dom.slotCountInput.valueAsNumber,
             cellWidth: dom.cellWidthInput.valueAsNumber,
-            cellHeight: dom.cellHeightInput.valueAsNumber
+            cellHeight: dom.cellHeightInput.valueAsNumber,
+            cellFontSize: dom.cellFontSizeInput.valueAsNumber
         },
         labels: state.labels.map((label) => ({ ...label }))
     };
@@ -335,21 +348,28 @@ function handleMergeAction() {
 }
 
 function handleDocumentKeydown(event) {
-    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "a") {
-        selectAllCells();
-        event.preventDefault();
-        return;
+    // Handle Enter key to focus description input
+    if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        if (!isEditableTarget(event.target) && state.selectedIndices.length > 0) {
+            dom.selectedTextInput.focus();
+            if (typeof dom.selectedTextInput.setSelectionRange === "function") {
+                const caretPosition = dom.selectedTextInput.value.length;
+                dom.selectedTextInput.setSelectionRange(caretPosition, caretPosition);
+            }
+            event.preventDefault();
+            return;
+        }
     }
 
-    if (!event.ctrlKey && !event.metaKey && !event.altKey && isNavigationKey(event.key)) {
-        if (shouldHandleArrowNavigation(event.target) && moveSelection(event.key)) {
+    // Handle Escape key - always allow blurring focused inputs
+    if (event.key === "Escape") {
+        // Unfocus any focused input or select element
+        if (isEditableTarget(event.target)) {
+            event.target.blur();
             event.preventDefault();
+            return;
         }
 
-        return;
-    }
-
-    if (event.key === "Escape") {
         if (!state.selectedIndices.length) {
             return;
         }
@@ -359,11 +379,79 @@ function handleDocumentKeydown(event) {
         return;
     }
 
-    if (event.key !== "Delete" || event.ctrlKey || event.metaKey || event.altKey) {
+    // Ignore all hotkeys if focused on input or select element
+    if (isEditableTarget(event.target)) {
         return;
     }
 
-    if (isEditableTarget(event.target) && event.target !== dom.selectedTextInput) {
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "a") {
+        selectAllCells();
+        event.preventDefault();
+        return;
+    }
+
+    if (!event.altKey && isNavigationKey(event.key)) {
+        if (shouldHandleArrowNavigation(event.target)) {
+            const isShiftHeld = event.shiftKey;
+            const isCtrlHeld = event.ctrlKey || event.metaKey;
+
+            if (isShiftHeld || isCtrlHeld) {
+                // Extend or toggle selection with shift/ctrl + arrow
+                const selectableIndices = getSelectableIndices();
+
+                if (!selectableIndices.length) {
+                    return;
+                }
+
+                if (!state.selectedIndices.length) {
+                    selectCell(selectableIndices[0]);
+                    event.preventDefault();
+                    return;
+                }
+
+                // For extend mode, move from the frontier (the end of selection being extended)
+                // The frontier is the selected index that's farthest from the anchor
+                let currentIndex;
+                if (isShiftHeld) {
+                    let frontier = selectionAnchorIndex;
+                    for (const idx of state.selectedIndices) {
+                        if (Math.abs(idx - selectionAnchorIndex) > Math.abs(frontier - selectionAnchorIndex)) {
+                            frontier = idx;
+                        }
+                    }
+                    currentIndex = frontier;
+                } else {
+                    // For toggle mode, use anchor or first selected
+                    currentIndex = state.selectedIndices.includes(selectionAnchorIndex)
+                        ? selectionAnchorIndex
+                        : state.selectedIndices[0];
+                }
+
+                const visibleIndex = selectableIndices.indexOf(currentIndex);
+
+                if (visibleIndex < 0) {
+                    return;
+                }
+
+                const step = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+                const nextVisibleIndex = Math.min(selectableIndices.length - 1, Math.max(0, visibleIndex + step));
+
+                if (nextVisibleIndex !== visibleIndex) {
+                    selectCell(selectableIndices[nextVisibleIndex], {
+                        extend: isShiftHeld,
+                        toggle: isCtrlHeld
+                    });
+                }
+                event.preventDefault();
+            } else if (moveSelection(event.key)) {
+                event.preventDefault();
+            }
+        }
+
+        return;
+    }
+
+    if (event.key !== "Delete" || event.ctrlKey || event.metaKey || event.altKey) {
         return;
     }
 
@@ -376,7 +464,7 @@ function handleDocumentPointerDown(event) {
         return;
     }
 
-    if (event.target.closest("[data-index], .inspector, .ts-dropdown, .print-warning-dialog")) {
+    if (event.target.closest("[data-index], .inspector, .ts-dropdown")) {
         return;
     }
 
@@ -483,16 +571,14 @@ function selectCell(index, options = {}) {
     }
 
     selectionAnchorIndex = nextAnchorIndex;
-    render();
 
-    if (options.focusText !== false && state.selectedIndices.length === 1) {
-        dom.selectedTextInput.focus();
-
-        if (typeof dom.selectedTextInput.setSelectionRange === "function") {
-            const caretPosition = dom.selectedTextInput.value.length;
-            dom.selectedTextInput.setSelectionRange(caretPosition, caretPosition);
-        }
+    // Blur text input if selection changed
+    if (JSON.stringify(state.selectedIndices) !== JSON.stringify(previousSelectionIndices)) {
+        dom.selectedTextInput.blur();
+        previousSelectionIndices = [...state.selectedIndices];
     }
+
+    render();
 }
 
 function exportState() {
@@ -533,13 +619,35 @@ function importState(event) {
 }
 
 function resetState() {
-    if (!isLayoutEmpty(state)) {
+    if (isLayoutEmpty(state)) {
+        // Layout is already empty, proceed directly
+        state = normalizeState(cloneState(DEFAULT_STATE));
+        selectionAnchorIndex = getSelectionAnchorIndex();
+        render();
+        queueSave();
+        showToast("Layout reset to default.");
+        return;
+    }
+
+    if (!resetConfirmModal) {
         const confirmed = window.confirm("Are you sure you want to reset the layout? This cannot be undone.");
 
-        if (!confirmed) {
-            return;
+        if (confirmed) {
+            state = normalizeState(cloneState(DEFAULT_STATE));
+            selectionAnchorIndex = getSelectionAnchorIndex();
+            render();
+            queueSave();
+            showToast("Layout reset to default.");
         }
+
+        return;
     }
+
+    resetConfirmModal.show();
+}
+
+function handleResetConfirm() {
+    resetConfirmModal?.hide();
 
     state = normalizeState(cloneState(DEFAULT_STATE));
     selectionAnchorIndex = getSelectionAnchorIndex();
@@ -551,14 +659,36 @@ function resetState() {
 async function loadDemoLayout(options = {}) {
     const { skipConfirm = false, notice = "Demo layout loaded." } = options;
 
-    if (!skipConfirm && !isLayoutEmpty(state)) {
-        const confirmed = window.confirm("Load the demo layout? This will overwrite your current layout.");
-
-        if (!confirmed) {
-            return false;
-        }
+    if (skipConfirm || isLayoutEmpty(state)) {
+        // No confirmation needed, load directly
+        return await _performLoadDemoLayout(notice);
     }
 
+    if (!loadDemoConfirmModal) {
+        const confirmed = window.confirm("Load the demo layout? This will overwrite your current layout.");
+
+        if (confirmed) {
+            return await _performLoadDemoLayout(notice);
+        }
+
+        return false;
+    }
+
+    // Store options for modal confirmation handler
+    pendingDemoLoadOptions = notice;
+    loadDemoConfirmModal.show();
+    return true; // Will complete asynchronously when user confirms
+}
+
+async function handleLoadDemoConfirm() {
+    loadDemoConfirmModal?.hide();
+
+    const notice = pendingDemoLoadOptions || "Demo layout loaded.";
+    pendingDemoLoadOptions = null;
+    await _performLoadDemoLayout(notice);
+}
+
+async function _performLoadDemoLayout(notice) {
     try {
         const response = await fetch("./demo-layout.json", { cache: "no-store" });
 

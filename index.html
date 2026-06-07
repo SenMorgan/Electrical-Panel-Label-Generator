@@ -30,17 +30,21 @@
                 <div class="row g-3 align-items-start">
                     <div class="col-12 col-xl-6">
                         <div class="row g-3">
-                            <div class="col-4">
+                            <div class="col-3">
                                 <label class="form-label mb-1" for="slotCountInput">Breaker count</label>
                                 <input id="slotCountInput" class="form-control" type="number" min="1" max="42" step="1" placeholder="10">
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <label class="form-label mb-1" for="cellWidthInput">Cell width (mm)</label>
                                 <input id="cellWidthInput" class="form-control" type="number" min="10" max="50" step="0.5" placeholder="18">
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <label class="form-label mb-1" for="cellHeightInput">Cell height (mm)</label>
                                 <input id="cellHeightInput" class="form-control" type="number" min="10" max="60" step="0.5" placeholder="30">
+                            </div>
+                            <div class="col-3">
+                                <label class="form-label mb-1" for="cellFontSizeInput">Font size (mm)</label>
+                                <input id="cellFontSizeInput" class="form-control" type="number" min="1.2" max="10" step="0.1" placeholder="2.7">
                             </div>
                         </div>
                         <p id="layoutStatus" class="text-secondary small mt-2 mb-0"></p>
@@ -69,7 +73,7 @@
                             <button type="button" id="exportBtn" class="btn btn-outline-secondary"><i class="mdi mdi-download me-1"></i>Export JSON</button>
                             <button type="button" id="importBtn" class="btn btn-outline-secondary"><i class="mdi mdi-upload me-1"></i>Import JSON</button>
                             <button type="button" id="loadDemoBtn" class="btn btn-outline-secondary"><i class="mdi mdi-text-box-check me-1"></i>Load Demo</button>
-                            <button type="button" id="resetBtn" class="btn btn-outline-danger"><i class="mdi mdi-refresh me-1"></i>Reset Layout</button>
+                            <button type="button" id="resetBtn" class="btn btn-outline-danger"><i class="mdi mdi-refresh me-1"></i>Reset</button>
                         </div>
                     </div>
                 </div>
@@ -138,22 +142,6 @@
                 <span><a href="https://www.flaticon.com/free-icons/danger" title="danger icons" target="_blank" rel="noreferrer">Danger icons created by verluk - Flaticon</a></span>
             </div>
         </footer>
-
-        <dialog id="printWarningDialog" class="print-warning-dialog">
-            <form method="dialog" class="print-warning-card">
-                <h2 class="h4 mb-2">
-                    <i class="mdi mdi-alert text-warning me-1"></i>Before printing</h2>
-                <p class="text-secondary mb-3">Set printer scale to 100% in the printer settings so the label sizes stay accurate in millimeters.</p>
-                <label class="form-check mb-3" for="disablePrintWarningCheckbox">
-                    <input id="disablePrintWarningCheckbox" class="form-check-input" type="checkbox">
-                    <span class="form-check-label">Do not show this warning again</span>
-                </label>
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" value="cancel" class="btn btn-outline-secondary"><i class="mdi mdi-close me-1"></i>Cancel</button>
-                    <button type="submit" value="confirm" class="btn btn-primary"><i class="mdi mdi-check me-1"></i>Continue to Print</button>
-                </div>
-            </form>
-        </dialog>
 
         <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3 d-print-none"></div>
     </div>
