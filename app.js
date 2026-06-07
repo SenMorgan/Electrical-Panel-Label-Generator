@@ -597,7 +597,7 @@ function selectCell(index, options = {}) {
 }
 
 function exportState() {
-    const payload = JSON.stringify(createExportState(state), null, 2);
+    const payload = JSON.stringify(createExportState(state));
     const blob = new Blob([payload], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
