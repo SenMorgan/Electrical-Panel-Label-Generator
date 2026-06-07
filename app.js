@@ -67,6 +67,7 @@ let iconPicker = null;
 let syncingIconPicker = false;
 let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
+let previousSelectionIndices = [];
 
 void init();
 
@@ -335,6 +336,42 @@ function handleMergeAction() {
 }
 
 function handleDocumentKeydown(event) {
+    // Handle Enter key to focus description input
+    if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        if (!isEditableTarget(event.target) && state.selectedIndices.length > 0) {
+            dom.selectedTextInput.focus();
+            if (typeof dom.selectedTextInput.setSelectionRange === "function") {
+                const caretPosition = dom.selectedTextInput.value.length;
+                dom.selectedTextInput.setSelectionRange(caretPosition, caretPosition);
+            }
+            event.preventDefault();
+            return;
+        }
+    }
+
+    // Handle Escape key - always allow blurring focused inputs
+    if (event.key === "Escape") {
+        // Unfocus any focused input or select element
+        if (isEditableTarget(event.target)) {
+            event.target.blur();
+            event.preventDefault();
+            return;
+        }
+
+        if (!state.selectedIndices.length) {
+            return;
+        }
+
+        clearSelection();
+        event.preventDefault();
+        return;
+    }
+
+    // Ignore all hotkeys if focused on input or select element
+    if (isEditableTarget(event.target)) {
+        return;
+    }
+
     if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "a") {
         selectAllCells();
         event.preventDefault();
@@ -349,21 +386,7 @@ function handleDocumentKeydown(event) {
         return;
     }
 
-    if (event.key === "Escape") {
-        if (!state.selectedIndices.length) {
-            return;
-        }
-
-        clearSelection();
-        event.preventDefault();
-        return;
-    }
-
     if (event.key !== "Delete" || event.ctrlKey || event.metaKey || event.altKey) {
-        return;
-    }
-
-    if (isEditableTarget(event.target) && event.target !== dom.selectedTextInput) {
         return;
     }
 
@@ -478,21 +501,19 @@ function selectCell(index, options = {}) {
 
     state.selectedIndices = normalizeSelection(state.labels, nextSelection);
 
-    if (!state.selectedIndices.includes(nextAnchorIndex)) {
+    if (!state.selectedIndices.includes(nextAnchorIndex)) {c
         nextAnchorIndex = state.selectedIndices[0] ?? 0;
     }
 
     selectionAnchorIndex = nextAnchorIndex;
-    render();
 
-    if (options.focusText !== false && state.selectedIndices.length === 1) {
-        dom.selectedTextInput.focus();
-
-        if (typeof dom.selectedTextInput.setSelectionRange === "function") {
-            const caretPosition = dom.selectedTextInput.value.length;
-            dom.selectedTextInput.setSelectionRange(caretPosition, caretPosition);
-        }
+    // Blur text input if selection changed
+    if (JSON.stringify(state.selectedIndices) !== JSON.stringify(previousSelectionIndices)) {
+        dom.selectedTextInput.blur();
+        previousSelectionIndices = [...state.selectedIndices];
     }
+
+    render();
 }
 
 function exportState() {
