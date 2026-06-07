@@ -21,7 +21,7 @@ export const BADGE_COLOR_PRESETS = [
 export const DEFAULT_STATE = {
     config: {
         slotCount: 10,
-        cellWidth: 18,
+        cellWidth: 17.5,
         cellHeight: 30,
         cellFontSize: 2.7
     },
