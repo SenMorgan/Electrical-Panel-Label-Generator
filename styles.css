@@ -131,6 +131,7 @@ body {
 }
 
 .label-strip {
+    --cell-font-size: 2.7mm;
     display: flex;
     align-items: flex-start;
     gap: 0;
@@ -230,7 +231,7 @@ body {
     flex: 1;
     min-height: 0;
     width: 100%;
-    font-size: 2.7mm;
+    font-size: var(--cell-font-size, 2.7mm);
     line-height: 1.18;
     white-space: pre-wrap;
     overflow-wrap: anywhere;

@@ -22,7 +22,8 @@ export const DEFAULT_STATE = {
     config: {
         slotCount: 10,
         cellWidth: 18,
-        cellHeight: 30
+        cellHeight: 30,
+        cellFontSize: 2.7
     },
     layout: {
         hideCellIndex: false,
@@ -88,7 +89,8 @@ export function normalizeState(inputState) {
         config: {
             slotCount: clampInt(inputState?.config?.slotCount, 14, 1, 42),
             cellWidth: clampNumber(inputState?.config?.cellWidth, 18, 8, 50),
-            cellHeight: clampNumber(inputState?.config?.cellHeight, 30, 10, 60)
+            cellHeight: clampNumber(inputState?.config?.cellHeight, 30, 10, 60),
+            cellFontSize: clampNumber(inputState?.config?.cellFontSize, 2.7, 1.2, 10)
         },
         layout: {
             hideCellIndex: Boolean(inputState?.layout?.hideCellIndex),

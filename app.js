@@ -31,6 +31,7 @@ const dom = {
     slotCountInput: document.querySelector("#slotCountInput"),
     cellWidthInput: document.querySelector("#cellWidthInput"),
     cellHeightInput: document.querySelector("#cellHeightInput"),
+    cellFontSizeInput: document.querySelector("#cellFontSizeInput"),
     exportBtn: document.querySelector("#exportBtn"),
     importBtn: document.querySelector("#importBtn"),
     importFileInput: document.querySelector("#importFileInput"),
@@ -109,6 +110,7 @@ function bindEvents() {
     dom.slotCountInput.addEventListener("change", handleConfigChange);
     dom.cellWidthInput.addEventListener("change", handleConfigChange);
     dom.cellHeightInput.addEventListener("change", handleConfigChange);
+    dom.cellFontSizeInput.addEventListener("change", handleConfigChange);
     document.addEventListener("keydown", handleDocumentKeydown, true);
     document.addEventListener("pointerdown", handleDocumentPointerDown);
 
@@ -299,7 +301,8 @@ function handleConfigChange() {
         config: {
             slotCount: dom.slotCountInput.valueAsNumber,
             cellWidth: dom.cellWidthInput.valueAsNumber,
-            cellHeight: dom.cellHeightInput.valueAsNumber
+            cellHeight: dom.cellHeightInput.valueAsNumber,
+            cellFontSize: dom.cellFontSizeInput.valueAsNumber
         },
         labels: state.labels.map((label) => ({ ...label }))
     };
