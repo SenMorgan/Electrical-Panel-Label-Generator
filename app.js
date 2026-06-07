@@ -26,6 +26,11 @@ import {
     updateCellText
 } from "./js/ui.js";
 import { initLogger, showToast, showError, showWarning } from "./js/logger.js";
+import {
+    createPrintWarningModal,
+    createResetConfirmModal,
+    createLoadDemoConfirmModal
+} from "./js/modals.js";
 
 const dom = {
     slotCountInput: document.querySelector("#slotCountInput"),
@@ -37,8 +42,6 @@ const dom = {
     importFileInput: document.querySelector("#importFileInput"),
     loadDemoBtn: document.querySelector("#loadDemoBtn"),
     resetBtn: document.querySelector("#resetBtn"),
-    printWarningDialog: document.querySelector("#printWarningDialog"),
-    disablePrintWarningCheckbox: document.querySelector("#disablePrintWarningCheckbox"),
     printBtn: document.querySelector("#printBtn"),
     selectedMeta: document.querySelector("#selectedMeta"),
     selectedIconInput: document.querySelector("#selectedIconInput"),
@@ -69,6 +72,13 @@ let syncingIconPicker = false;
 let selectionAnchorIndex = getSelectionAnchorIndex();
 let pendingSelectionGesture = null;
 let previousSelectionIndices = [];
+let pendingDemoLoadOptions = null;
+
+// Modal references
+let printWarningModal = null;
+let disablePrintWarningCheckbox = null;
+let resetConfirmModal = null;
+let loadDemoConfirmModal = null;
 
 void init();
 
@@ -104,6 +114,18 @@ async function init() {
     } catch (error) {
         showError("Unable to load the MDI icon catalog. Label editing and printing still work.", error);
     }
+
+    // Initialize modals
+    const printWarning = createPrintWarningModal(handlePrintWarningConfirm);
+    printWarningModal = window.bootstrap.Modal.getOrCreateInstance(printWarning.element);
+    disablePrintWarningCheckbox = printWarning.checkbox;
+
+    const resetConfirm = createResetConfirmModal(handleResetConfirm);
+    resetConfirmModal = window.bootstrap.Modal.getOrCreateInstance(resetConfirm.element);
+
+    const loadDemoConfirm = createLoadDemoConfirmModal(handleLoadDemoConfirm);
+    loadDemoConfirmModal = window.bootstrap.Modal.getOrCreateInstance(loadDemoConfirm.element);
+
 }
 
 function bindEvents() {
@@ -173,13 +195,6 @@ function bindEvents() {
     dom.resetBtn.addEventListener("click", resetState);
     dom.printBtn.addEventListener("click", handlePrintRequest);
 
-    if (dom.printWarningDialog) {
-        dom.printWarningDialog.addEventListener("close", handlePrintWarningClose);
-        dom.printWarningDialog.addEventListener("cancel", () => {
-            dom.disablePrintWarningCheckbox.checked = false;
-        });
-    }
-
     dom.labelStrip.addEventListener("mousedown", (event) => {
         const cell = event.target.closest("[data-index]");
 
@@ -248,7 +263,7 @@ function handlePrintRequest() {
         return;
     }
 
-    if (typeof dom.printWarningDialog?.showModal !== "function") {
+    if (!printWarningModal) {
         const confirmed = window.confirm("Set printer scale to 100% in the printer settings so the label sizes stay accurate in millimeters.");
 
         if (confirmed) {
@@ -258,26 +273,20 @@ function handlePrintRequest() {
         return;
     }
 
-    dom.disablePrintWarningCheckbox.checked = false;
-    dom.printWarningDialog.showModal();
+    disablePrintWarningCheckbox.checked = false;
+    printWarningModal.show();
 }
 
-function handlePrintWarningClose() {
-    const shouldPrint = dom.printWarningDialog.returnValue === "confirm";
-
-    if (!shouldPrint) {
-        dom.disablePrintWarningCheckbox.checked = false;
-        return;
-    }
-
-    const nextShowPrintWarning = !dom.disablePrintWarningCheckbox.checked;
+function handlePrintWarningConfirm() {
+    const nextShowPrintWarning = !disablePrintWarningCheckbox.checked;
 
     if (state.preferences.showPrintWarning !== nextShowPrintWarning) {
         state.preferences.showPrintWarning = nextShowPrintWarning;
         queueSave();
     }
 
-    dom.disablePrintWarningCheckbox.checked = false;
+    disablePrintWarningCheckbox.checked = false;
+    printWarningModal?.hide();
     window.print();
 }
 
@@ -455,7 +464,7 @@ function handleDocumentPointerDown(event) {
         return;
     }
 
-    if (event.target.closest("[data-index], .inspector, .ts-dropdown, .print-warning-dialog")) {
+    if (event.target.closest("[data-index], .inspector, .ts-dropdown")) {
         return;
     }
 
@@ -557,7 +566,7 @@ function selectCell(index, options = {}) {
 
     state.selectedIndices = normalizeSelection(state.labels, nextSelection);
 
-    if (!state.selectedIndices.includes(nextAnchorIndex)) {c
+    if (!state.selectedIndices.includes(nextAnchorIndex)) {
         nextAnchorIndex = state.selectedIndices[0] ?? 0;
     }
 
@@ -610,13 +619,35 @@ function importState(event) {
 }
 
 function resetState() {
-    if (!isLayoutEmpty(state)) {
+    if (isLayoutEmpty(state)) {
+        // Layout is already empty, proceed directly
+        state = normalizeState(cloneState(DEFAULT_STATE));
+        selectionAnchorIndex = getSelectionAnchorIndex();
+        render();
+        queueSave();
+        showToast("Layout reset to default.");
+        return;
+    }
+
+    if (!resetConfirmModal) {
         const confirmed = window.confirm("Are you sure you want to reset the layout? This cannot be undone.");
 
-        if (!confirmed) {
-            return;
+        if (confirmed) {
+            state = normalizeState(cloneState(DEFAULT_STATE));
+            selectionAnchorIndex = getSelectionAnchorIndex();
+            render();
+            queueSave();
+            showToast("Layout reset to default.");
         }
+
+        return;
     }
+
+    resetConfirmModal.show();
+}
+
+function handleResetConfirm() {
+    resetConfirmModal?.hide();
 
     state = normalizeState(cloneState(DEFAULT_STATE));
     selectionAnchorIndex = getSelectionAnchorIndex();
@@ -628,14 +659,36 @@ function resetState() {
 async function loadDemoLayout(options = {}) {
     const { skipConfirm = false, notice = "Demo layout loaded." } = options;
 
-    if (!skipConfirm && !isLayoutEmpty(state)) {
-        const confirmed = window.confirm("Load the demo layout? This will overwrite your current layout.");
-
-        if (!confirmed) {
-            return false;
-        }
+    if (skipConfirm || isLayoutEmpty(state)) {
+        // No confirmation needed, load directly
+        return await _performLoadDemoLayout(notice);
     }
 
+    if (!loadDemoConfirmModal) {
+        const confirmed = window.confirm("Load the demo layout? This will overwrite your current layout.");
+
+        if (confirmed) {
+            return await _performLoadDemoLayout(notice);
+        }
+
+        return false;
+    }
+
+    // Store options for modal confirmation handler
+    pendingDemoLoadOptions = notice;
+    loadDemoConfirmModal.show();
+    return true; // Will complete asynchronously when user confirms
+}
+
+async function handleLoadDemoConfirm() {
+    loadDemoConfirmModal?.hide();
+
+    const notice = pendingDemoLoadOptions || "Demo layout loaded.";
+    pendingDemoLoadOptions = null;
+    await _performLoadDemoLayout(notice);
+}
+
+async function _performLoadDemoLayout(notice) {
     try {
         const response = await fetch("./demo-layout.json", { cache: "no-store" });
 

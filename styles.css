@@ -51,23 +51,8 @@ body {
     text-decoration: underline;
 }
 
-.print-warning-dialog {
-    width: min(100% - 2rem, 29rem);
-    padding: 0;
-    border: 0;
-    border-radius: 1.1rem;
-    background: transparent;
-    box-shadow: none;
-}
-
-.print-warning-dialog::backdrop {
-    background: rgba(23, 33, 43, 0.38);
-    backdrop-filter: blur(3px);
-}
-
 .print-warning-card {
     margin: 0;
-    padding: 1.4rem;
     border: 1px solid rgba(215, 221, 229, 0.95);
     border-radius: 1.1rem;
     background: rgba(255, 255, 255, 0.98);
@@ -360,6 +345,14 @@ body {
         background: #fff;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+    }
+
+    .modal-backdrop {
+        display: none !important;
+    }
+
+    .modal {
+        display: none !important;
     }
 
     .cell-text:empty::before {
