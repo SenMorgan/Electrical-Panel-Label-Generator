@@ -1,12 +1,19 @@
 {
   "config": {
     "slotCount": 14,
-    "cellWidth": 18,
-    "cellHeight": 30
+    "cellWidth": 17.5,
+    "cellHeight": 30,
+    "cellFontSize": 2.3
+  },
+  "layout": {
+    "hideCellIndex": false,
+    "hideCellIcon": false,
+    "hideCellText": false,
+    "hideCellGrid": false
   },
   "labels": [
     {
-      "text": "Proudový chránič",
+      "text": "<b>Proudový chránič</b>",
       "icon": "electric-switch",
       "badgeColor": "#8e24aa",
       "span": 2,
@@ -14,90 +21,90 @@
     },
     {
       "text": "",
-      "icon": "none",
+      "icon": "",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": true
     },
     {
-      "text": "Zásuvky kuchyň",
-      "icon": "fridge-outline",
+      "text": "<b>Zás. kuchyň okno</b> (PC, gril, fritéza) + chodba",
+      "icon": "desktop-tower-monitor",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Kuchyňská linka",
+      "text": "<b>Zás. kuch. linka</b> (mikrovlnka, detektor plynu, Alice)",
       "icon": "microwave",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Zásuvky ložnice",
-      "icon": "bed-king-outline",
-      "badgeColor": "#43a047",
-      "span": 1,
-      "covered": false
-    },
-    {
-      "text": "Zásuvky obývací pokoj",
+      "text": "<b>Zás. obývák</b> (TV, server) + kuchyň u vstupu",
       "icon": "television-classic",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Zásuvka trouba",
+      "text": "<b>Zás. ložnice</b> + zás. koupelna (u zrcadla)",
+      "icon": "bed-king-outline",
+      "badgeColor": "#43a047",
+      "span": 1,
+      "covered": false
+    },
+    {
+      "text": "<b>Zás. kuchyň pod linkou</b> (lednice, trouba, kávovar)",
       "icon": "stove",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Zásuvka pračka",
+      "text": "<b>Zás. koupelna</b> (pračka)",
       "icon": "washing-machine",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Zásuvka kotel",
+      "text": "<b>Zás. koupelna</b> (kotel)",
       "icon": "water-boiler",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Zásuvka myčka",
+      "text": "<b>Zás. kuchyň pod linkou</b> (myčka nádobí)",
       "icon": "dishwasher",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Venkovní zásuvka ",
+      "text": "<b>Zás. venkovní </b>",
       "icon": "power-socket-fr",
       "badgeColor": "#43a047",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Světla",
+      "text": "<b>Osvětlení byt</b>",
       "icon": "lightbulb-multiple-outline",
       "badgeColor": "#fdd835",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Digistor",
+      "text": "<b>Digestoř kuchyň</b>",
       "icon": "ceiling-fan",
       "badgeColor": "#fdd835",
       "span": 1,
       "covered": false
     },
     {
-      "text": "Ventilace",
+      "text": "<b>Ventilace WC + koupelna</b>",
       "icon": "hvac",
       "badgeColor": "#fdd835",
       "span": 1,

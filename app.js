@@ -27,6 +27,12 @@ import {
 } from "./js/ui.js";
 import { initLogger, showToast, showError, showWarning } from "./js/logger.js";
 import {
+    initRichTextEditor,
+    getEditorContent,
+    setEditorContent,
+    htmlToPlainText
+} from "./js/richtext.js";
+import {
     createPrintWarningModal,
     createResetConfirmModal,
     createLoadDemoConfirmModal
@@ -46,6 +52,9 @@ const dom = {
     selectedMeta: document.querySelector("#selectedMeta"),
     selectedIconInput: document.querySelector("#selectedIconInput"),
     selectedTextInput: document.querySelector("#selectedTextInput"),
+    textBoldBtn: document.querySelector("#textBoldBtn"),
+    textItalicBtn: document.querySelector("#textItalicBtn"),
+    textUnderlineBtn: document.querySelector("#textUnderlineBtn"),
     selectedBadgeColorPreset: document.querySelector("#selectedBadgeColorPreset"),
     selectedBadgeColorHex: document.querySelector("#selectedBadgeColorHex"),
     selectedBadgeColorChip: document.querySelector("#selectedBadgeColorChip"),
@@ -97,6 +106,7 @@ async function init() {
 
     dom.footerYear.textContent = String(new Date().getFullYear());
     bindEvents();
+    initRichTextEditor(dom);
     initIconPicker();
     render();
 
@@ -137,11 +147,12 @@ function bindEvents() {
     document.addEventListener("pointerdown", handleDocumentPointerDown);
 
     dom.selectedTextInput.addEventListener("input", (event) => {
+        const htmlContent = getEditorContent(dom.selectedTextInput, true);
         applyToSelected((label) => {
-            label.text = event.target.value;
+            label.text = htmlContent;
         });
         state.selectedIndices.forEach((index) => {
-            updateCellText(dom.labelStrip, index, event.target.value);
+            updateCellText(dom.labelStrip, index, htmlContent);
         });
         queueSave();
     });
@@ -234,10 +245,14 @@ function bindEvents() {
 
         const cell = textElement.closest("[data-index]");
         const index = Number(cell.dataset.index);
-        state.labels[index].text = textElement.textContent.replace(/\n{3,}/g, "\n\n").trim();
+
+        const htmlContent = getEditorContent(textElement, true);
+
+        state.labels[index].text = htmlContent;
 
         if (state.selectedIndices.length === 1 && state.selectedIndices[0] === index) {
-            dom.selectedTextInput.value = state.labels[index].text;
+            // Update the side panel editor with the same content
+            setEditorContent(dom.selectedTextInput, htmlContent);
         }
 
         queueSave();
@@ -582,7 +597,7 @@ function selectCell(index, options = {}) {
 }
 
 function exportState() {
-    const payload = JSON.stringify(createExportState(state), null, 2);
+    const payload = JSON.stringify(createExportState(state));
     const blob = new Blob([payload], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

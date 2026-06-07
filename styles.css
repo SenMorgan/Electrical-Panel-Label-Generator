@@ -322,6 +322,28 @@ body {
     line-height: 1;
 }
 
+.rich-text-editor {
+    min-height: 80px;
+    padding: 0.5rem;
+    overflow-y: auto;
+    outline: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.rich-text-editor:empty::before {
+    content: attr(data-placeholder);
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.rich-text-toolbar .btn.active {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
 @media (max-width: 1399.98px) {
     .inspector {
         position: static;
