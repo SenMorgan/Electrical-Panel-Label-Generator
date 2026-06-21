@@ -21,6 +21,7 @@ export const BADGE_COLOR_PRESETS = [
 export const DEFAULT_STATE = {
     config: {
         slotCount: 10,
+        cellIndexStart: 1,
         cellWidth: 17.5,
         cellHeight: 30,
         cellFontSize: 2.7
@@ -88,6 +89,7 @@ export function normalizeState(inputState) {
     const normalized = {
         config: {
             slotCount: clampInt(inputState?.config?.slotCount, 14, 1, 42),
+            cellIndexStart: clampInt(inputState?.config?.cellIndexStart, 1, 0, 9999),
             cellWidth: clampNumber(inputState?.config?.cellWidth, 18, 8, 50),
             cellHeight: clampNumber(inputState?.config?.cellHeight, 30, 10, 60),
             cellFontSize: clampNumber(inputState?.config?.cellFontSize, 2.7, 1.2, 10)
@@ -258,6 +260,10 @@ export function hasStoredState() {
 
 export function isLayoutEmpty(state) {
     const normalized = normalizeState(state);
+
+    if (normalized.config.cellIndexStart !== DEFAULT_STATE.config.cellIndexStart) {
+        return false;
+    }
 
     if (normalized.config.slotCount !== DEFAULT_STATE.config.slotCount
         || normalized.config.cellWidth !== DEFAULT_STATE.config.cellWidth

@@ -40,6 +40,7 @@ import {
 
 const dom = {
     slotCountInput: document.querySelector("#slotCountInput"),
+    cellIndexStartInput: document.querySelector("#cellIndexStartInput"),
     cellWidthInput: document.querySelector("#cellWidthInput"),
     cellHeightInput: document.querySelector("#cellHeightInput"),
     cellFontSizeInput: document.querySelector("#cellFontSizeInput"),
@@ -140,6 +141,7 @@ async function init() {
 
 function bindEvents() {
     dom.slotCountInput.addEventListener("change", handleConfigChange);
+    dom.cellIndexStartInput.addEventListener("change", handleConfigChange);
     dom.cellWidthInput.addEventListener("change", handleConfigChange);
     dom.cellHeightInput.addEventListener("change", handleConfigChange);
     dom.cellFontSizeInput.addEventListener("change", handleConfigChange);
@@ -324,6 +326,7 @@ function handleConfigChange() {
         ...state,
         config: {
             slotCount: dom.slotCountInput.valueAsNumber,
+            cellIndexStart: dom.cellIndexStartInput.valueAsNumber,
             cellWidth: dom.cellWidthInput.valueAsNumber,
             cellHeight: dom.cellHeightInput.valueAsNumber,
             cellFontSize: dom.cellFontSizeInput.valueAsNumber

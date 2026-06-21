@@ -7,6 +7,7 @@ Static DIN rail breaker label generator built for GitHub Pages and local file ho
 - One-row breaker strip with configurable slot count, cell width, and cell height.
 - Exact millimeter sizing for print output on A4 landscape sheets.
 - Multi-select editing with Shift/Ctrl selection, contiguous merge, and split support.
+- Configurable starting index for the visible cell numbers.
 - Tom Select powered Material Design Icons picker with live previews and fast search by icon name.
 - JSON export and import for sharing configurations.
 - Debounced localStorage persistence with separate storage for preferences (print warning toggle) and layout data.
