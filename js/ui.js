@@ -146,9 +146,22 @@ function renderSelectionPanel(dom, state) {
 function renderStatus(dom, state) {
     const stripWidth = getStripWidthMm(state);
     const usablePageWidth = 281;
-    const fitStatus = stripWidth <= usablePageWidth ? "fits" : "exceeds";
+    const fitsPage = stripWidth <= usablePageWidth;
+    const fitStatus = fitsPage ? "fits" : "exceeds";
 
-    dom.layoutStatus.textContent = `Strip width ${formatNumber(stripWidth)} mm ${fitStatus} the approx. ${usablePageWidth} mm printable width on A4 landscape.`;
+    dom.layoutStatus.replaceChildren();
+    dom.layoutStatus.append(
+        document.createTextNode("All dimensions are in mm. The strip width "),
+        document.createTextNode(`${formatNumber(stripWidth)} mm `)
+    );
+
+    const statusWord = document.createElement("span");
+    statusWord.className = `fw-semibold ${fitsPage ? "text-success" : "text-danger"}`;
+    statusWord.textContent = fitStatus;
+    dom.layoutStatus.append(
+        statusWord,
+        document.createTextNode(` the printable area of an A4 landscape page (~${usablePageWidth} mm).`)
+    );
 }
 
 function getStripWidthMm(state) {
