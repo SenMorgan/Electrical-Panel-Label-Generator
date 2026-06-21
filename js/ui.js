@@ -53,6 +53,7 @@ function syncPreferenceCheckboxes(dom, state) {
 
 function syncConfigInputs(dom, state) {
     dom.slotCountInput.value = state.config.slotCount;
+    dom.cellIndexStartInput.value = state.config.cellIndexStart;
     dom.cellWidthInput.value = state.config.cellWidth;
     dom.cellHeightInput.value = state.config.cellHeight;
     dom.cellFontSizeInput.value = state.config.cellFontSize;
@@ -66,7 +67,7 @@ function renderStrip(dom, state) {
     dom.labelStrip.classList.toggle("hide-grid", Boolean(state.layout.hideCellGrid));
     dom.labelStrip.style.setProperty("--cell-font-size", `${state.config.cellFontSize}mm`);
     const selectedIndices = new Set(state.selectedIndices);
-    let visibleCellNumber = 0;
+    let visibleCellNumber = state.config.cellIndexStart - 1;
 
     state.labels.forEach((label, index) => {
         if (label.covered) {
@@ -145,9 +146,22 @@ function renderSelectionPanel(dom, state) {
 function renderStatus(dom, state) {
     const stripWidth = getStripWidthMm(state);
     const usablePageWidth = 281;
-    const fitStatus = stripWidth <= usablePageWidth ? "fits" : "exceeds";
+    const fitsPage = stripWidth <= usablePageWidth;
+    const fitStatus = fitsPage ? "fits" : "exceeds";
 
-    dom.layoutStatus.textContent = `Strip width ${formatNumber(stripWidth)} mm ${fitStatus} the approx. ${usablePageWidth} mm printable width on A4 landscape.`;
+    dom.layoutStatus.replaceChildren();
+    dom.layoutStatus.append(
+        document.createTextNode("All dimensions are in mm. The strip width "),
+        document.createTextNode(`${formatNumber(stripWidth)} mm `)
+    );
+
+    const statusWord = document.createElement("span");
+    statusWord.className = `fw-semibold ${fitsPage ? "text-success" : "text-danger"}`;
+    statusWord.textContent = fitStatus;
+    dom.layoutStatus.append(
+        statusWord,
+        document.createTextNode(` the printable area of an A4 landscape page (~${usablePageWidth} mm).`)
+    );
 }
 
 function getStripWidthMm(state) {
@@ -183,9 +197,11 @@ function describeSelection(state) {
     const firstIndex = selectedIndices[0];
     const lastIndex = selectedIndices[selectedIndices.length - 1];
     const contiguous = selectedIndices.every((index, offset) => index === firstIndex + offset);
+    const firstLabelNumber = state.config.cellIndexStart + firstIndex;
+    const lastLabelNumber = state.config.cellIndexStart + lastIndex;
 
     return contiguous
-        ? `${selectedIndices.length} labels selected (positions ${firstIndex + 1}-${lastIndex + 1})`
+        ? `${selectedIndices.length} labels selected (positions ${firstLabelNumber}-${lastLabelNumber})`
         : `${selectedIndices.length} labels selected`;
 }
 

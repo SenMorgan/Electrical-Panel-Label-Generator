@@ -7,6 +7,7 @@ Static DIN rail breaker label generator built for GitHub Pages and local file ho
 - One-row breaker strip with configurable slot count, cell width, and cell height.
 - Exact millimeter sizing for print output on A4 landscape sheets.
 - Multi-select editing with Shift/Ctrl selection, contiguous merge, and split support.
+- Configurable starting index for the visible cell numbers.
 - Tom Select powered Material Design Icons picker with live previews and fast search by icon name.
 - JSON export and import for sharing configurations.
 - Debounced localStorage persistence with separate storage for preferences (print warning toggle) and layout data.
@@ -29,6 +30,12 @@ Static DIN rail breaker label generator built for GitHub Pages and local file ho
 - Tom Select is loaded via CDN for the icon selector.
 - The icon picker loads the full MDI catalog at runtime from the published MDI stylesheet so there is no build step.
 - Core behavior is implemented in plain browser JavaScript with no build step.
+
+## Planned Features
+- Broader page-size support (e.g., A3, A5, Letter) and custom page sizes.
+- Virtual scrolling (pagination) for the Tom Select dropdown to keep the icon picker responsive with large catalogs. https://tom-select.js.org/plugins/virtual_scroll/
+- Responsive layout improvements for mobile devices and smaller screens.
+- Master and slave cell relationships to represent breaker hierarchies, such as a main breaker with sub-breakers.
 
 ## Privacy
 
