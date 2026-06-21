@@ -31,6 +31,12 @@ Static DIN rail breaker label generator built for GitHub Pages and local file ho
 - The icon picker loads the full MDI catalog at runtime from the published MDI stylesheet so there is no build step.
 - Core behavior is implemented in plain browser JavaScript with no build step.
 
+## Planned Features
+- Broader page-size support (e.g., A3, A5, Letter) and custom page sizes.
+- Virtual scrolling (pagination) for the Tom Select dropdown to keep the icon picker responsive with large catalogs. https://tom-select.js.org/plugins/virtual_scroll/
+- Responsive layout improvements for mobile devices and smaller screens.
+- Master and slave cell relationships to represent breaker hierarchies, such as a main breaker with sub-breakers.
+
 ## Privacy
 
 - This app does not use cookies for tracking or advertising.
